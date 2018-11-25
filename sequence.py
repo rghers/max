@@ -280,7 +280,7 @@ class PlayerDeck(object):
 class PieceBoard(object):
     amtRows = 10
     amtCols = 10
-    board = [[0] * CardBoard.amtCols for row in range(CardBoard.amtRows)]
+    board = [["0"] * CardBoard.amtCols for row in range(CardBoard.amtRows)]
     
 #    redImg =
 #    greenImg = 
@@ -310,7 +310,7 @@ class PieceBoard(object):
         self.board[row][col] = playerNum
 
     def isValidPos(self, row, col):
-        return self.board[row][col] == 0
+        return self.board[row][col] == "0"
 
     def printBoard(self):
         print(self.board)
@@ -371,12 +371,15 @@ class PieceBoard(object):
     def getPlayer(self, row, col):
         return self.board[row][col]
 
+    def setPlayer(self, row, col, player):
+        self.board[row][col] = player
+
 
     ## TEMP STATE ##
     def drawPieces(self, canvas):
         for row in range(PieceBoard.amtRows):
             for col in range(PieceBoard.amtCols):
-                if(self.board[row][col] != 0):
+                if(self.board[row][col] != "0"):
                     fillP = "purple"
                     ## Rectangle represents Piece ##
                     if(self.board[row][col] == "1"):

@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10008
+PORT = 10030
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -16,7 +16,7 @@ def handleServerMsg(server, serverMsg):
   msg = ""
   command = ""
   while True:
-    msg += server.recv(10).decode("UTF-8")
+    msg += server.recv(1024).decode("UTF-8")
     command = msg.split("\n")
     while (len(command) > 1):
       readyMsg = command[0]
@@ -64,6 +64,7 @@ def mousePressed(event, data):
             data.playerCards.removeCard(data.cardBoard.getCard(row, col))
             data.pBoard.fillPosInPieceBoard(row, col, \
                                             data.playerID)
+            
             
             #data.cardBoard.getCard(row,col).convertColor()
             #data.cardBoard.modifyCardColor(row, col, \
