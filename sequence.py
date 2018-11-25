@@ -63,24 +63,31 @@ class Card(object):
 ##        newImage = self.convertColor(player)
 ##        self.picture = ImageTk.PhotoImage(newImage)
 
-    def convertColor(self, player):
-        if(player == 0):
-            return self.img
-        tempImage = self.img
-        for i in range(self.cardWidth):
-            for j in range(self.cardHeight):
-                pixel = tempImage.getpixel((i, j))
-                if(i == 0 and j == 0):
-                    print(pixel)
-               # if(pixel == (256, 256, 256)):
-                    #print("found white pixel")
-                if(player == 1):
-                    tempImage.putpixel((i, j), (125, 0, 0))
-                elif(player == 2):
-                    tempImage.putpixel((i, j), (0, 125, 0))
-                elif(player == 3):
-                    tempImage.putpixel((i, j), (0, 0, 125))
-        return tempImage
+##    def convertColor(self, player):
+##        if(player == 0):
+##            return self.img
+##        tempImage = self.img
+##        for i in range(self.cardWidth):
+##            for j in range(self.cardHeight):
+##                pixel = tempImage.getpixel((i, j))
+##                if(i == 0 and j == 0):
+##                    print(pixel)
+##               # if(pixel == (256, 256, 256)):
+##                    #print("found white pixel")
+##                if(player == 1):
+##                    tempImage.putpixel((i, j), (125, 0, 0))
+##                elif(player == 2):
+##                    tempImage.putpixel((i, j), (0, 125, 0))
+##                elif(player == 3):
+##                    tempImage.putpixel((i, j), (0, 0, 125))
+##        return tempImage'
+##
+##    def convertColor(self):
+##        imgRGBA = self.img.convert("RGBA")
+##        imgAlpha = imgComb.putalpha(125)
+##        self.img = imgComb
+
+    
 
     #def convertColor(self, player, white = "#000099", black = "#99CCFF"):
         #temp = self.img
@@ -99,20 +106,13 @@ class Card(object):
 ##                pixels[i, j] = newRGB
 ##        
 
-    #def cardClickedAction
-
-##    def getValue(self):
-##        return self.number
-##
-##    def getSuit(self):
-##        return self.suit
-##        
         
 class Deck(object):
 
     def __init__(self):
         self.deck = self.createDeck()
         self.usedCards = set()
+        
 
     def createDeck(self):
         cards = []
@@ -122,7 +122,14 @@ class Deck(object):
                     card = Card(rank, suit)
                     cards.append(card)
         return cards
-    
+
+##    def cardFillDeck(self):
+##        for cardInd in range(len(self.deck)):
+##            currCard = self.deck[cardInd]
+##            rank = currCard[0]
+##            suit = currCard[1]
+##            self.deck[cardInd] = Card(rank, suit)
+##    
     def getRandomCard(self):
         randCardIndex = random.randint(0, 51)
         while(self.deck[randCardIndex] in self.usedCards):
@@ -137,7 +144,6 @@ class Deck(object):
         return "Deck is: \n" + str(self.deck)
 
     
-
 
 class CardBoard(object):
     amtRows = 10
@@ -186,12 +192,10 @@ class CardBoard(object):
         newCard = card.convertColor(player)
         self.board[row][col] = newCard
 
-    def drawBoard(self, canvas, pieceBoard):
+    def drawBoard(self, canvas):
         for row in range(CardBoard.amtRows):
             for col in range(CardBoard.amtCols):
                 card = self.board[row][col]
-                #card.img = card.convertColor(pieceBoard.getPlayer(row, col))
-                #card.givePiece(pieceBoard.getPlayer(row, col))
                 card.drawPlayingCard(canvas, CardBoard.seperationX + \
                                      Card.cardWidth * col, \
                                      CardBoard.seperationY + \
@@ -277,9 +281,16 @@ class PieceBoard(object):
     amtRows = 10
     amtCols = 10
     board = [[0] * CardBoard.amtCols for row in range(CardBoard.amtRows)]
+    
+#    redImg =
+#    greenImg = 
 
     def __init__(self):
         self.board = PieceBoard.board
+##        self.blueImg = Image.open("blue.png")
+##        self.blueImg = blueImg.resize((Card.cardWidth, Card.cardHeight))
+##        self.blueImg = blueImg.putalpha(125)
+##        self.bluePic = ImageTk.PhotoImage(self.blueImg)
 
     def convertCoordToPos(self, xCoord, yCoord):
         topLeftX = CardBoard.seperationX - Card.cardWidth // 2
@@ -359,24 +370,33 @@ class PieceBoard(object):
 
 
     ## TEMP STATE ##
-    def drawPiece(self, canvas):
+    def drawPieces(self, canvas):
         for row in range(PieceBoard.amtRows):
             for col in range(PieceBoard.amtCols):
                 if(self.board[row][col] != 0):
+                    ## Rectangle represents Piece ##
                     if(self.board[row][col] == 1):
                         fillP = "red"
                     elif(self.board[row][col] == 2):
                         fillP = "blue"
                     elif(self.board[row][col] == 3):
                         fillP = "green"
-                    canvas.create_oval(CardBoard.seperationX + Card.cardWidth * col - 10,\
-                                       CardBoard.seperationY + Card.cardHeight * row - 10,\
-                                       CardBoard.seperationX + Card.cardWidth * col + 10,\
-                                       CardBoard.seperationY + Card.cardHeight * row + 10,\
-                                       fill = fillP)
+                    canvas.create_rectangle(CardBoard.seperationX + \
+                                       Card.cardWidth * col - Card.cardWidth // 2,
+                                       CardBoard.seperationY + \
+                                       Card.cardHeight * row - Card.cardHeight // 2,\
+                                       CardBoard.seperationX + \
+                                       Card.cardWidth * col + Card.cardWidth // 2,\
+                                       CardBoard.seperationY + \
+                                       Card.cardHeight * row + Card.cardHeight // 2,\
+                                       fill = fillP, activefill = "")
+                    ## END ##
+                        
+                    #canvas.create_image(50, 50, image = self.bluePic)
     ## END ## 
 
 
-        
 
-    
+
+
+

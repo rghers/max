@@ -1,9 +1,10 @@
 import socket
 import threading
 from queue import Queue
+import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10001
+PORT = 10003
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -34,87 +35,101 @@ import random
 ####################################
 
 def init(data):
-    data.me = Dot("Lonely", data.width/2, data.height/2)
-    data.otherStrangers = dict()
+    data.d1 = Deck()
+    data.d2 = Deck()
+##    data.d1.cardFillDeck()
+##    data.d2.cardFillDeck()
+    data.cardBoard = CardBoard()
+    data.cardBoard.cardFillBoard()
+    data.playerCards = PlayerDeck(data.d1, data.d2)
+    data.otherPlayers = dict()
+    data.gameOver = False
+    data.playedTurn = False
+    data.pBoard = PieceBoard()
+
+def endTurnClicked(data, x, y):
+    return (data.width - 50 <= x <= data.width and\
+            data.height - 50 <= y <= data.height)
 
 def mousePressed(event, data):
-    pass
+    msg = ""
+    row,col = data.pBoard.convertCoordToPos(event.x, event.y)
+    if(not data.playedTurn):
+        if(data.pBoard.onPieceBoard(row, col) and\
+           data.pBoard.isValidPos(row, col) and\
+           (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
+            data.playerCards.hasTwoEyedJack())):
+            data.playedTurn = True
+            data.playerCards.removeCard(data.cardBoard.getCard(row, col))
+            data.pBoard.fillPosInPieceBoard(row, col, \
+                                            data.players[data.playerInd])
+            
+            #data.cardBoard.getCard(row,col).convertColor()
+            #data.cardBoard.modifyCardColor(row, col, \
+                                           #data.players[data.playerInd])
+##            data.cardBoard.getCard(row, col).convertColor(\
+##                data.players[data.playerInd])
+  #          data.pBoard.printBoard()
+ #           print()
+            msg = "playerPlayed "+json.dumps(data.pBoard)
+            print(msg)
+        elif(data.pBoard.onPieceBoard(row, col) and\
+             not data.pBoard.isValidPos(row, col) and\
+             data.playerCards.hasOneEyedJack() and\
+             data.players[data.playerInd] != data.pBoard.getPlayer(row, col)):
+            data.playedTurn = True
+            data.playerCards.removeCard(data.cardBoard.getCard(row, col))
+            data.pBoard.fillPosInPieceBoard(row, col, 0)
+            msg = "playerPlayed "+json.dumps(data.pBoard)
+            print(msg)
+        elif(endTurnClicked(data, event.x, event.y)):
+            data.playerInd = (data.playerInd + 1) % len(data.players)
+            data.playedTurn = False
+            msg = "playerEnded"
+            print(msg)
+        if(msg != ""):
+            data.server.send(msg.encode())
 
 def keyPressed(event, data):
-    dx, dy = 0, 0
-    msg = ""
-
-    # moving
-    if event.keysym in ["Up", "Down", "Left", "Right"]:
-      speed = 5
-      if event.keysym == "Up":
-        dy = -speed
-      elif event.keysym == "Down":
-        dy = speed
-      elif event.keysym == "Left":
-        dx = -speed
-      elif event.keysym == "Right":
-        dx = speed
-      # move myself
-      data.me.move(dx, dy)
-      # update message to send
-      msg = "playerMoved %d %d\n" % (dx, dy)
-
-    # teleporting
-    elif event.keysym == "space":
-      # get a random coordinate
-      x = random.randint(0, data.width)
-      y = random.randint(0, data.height)
-      # teleport myself
-      data.me.teleport(x, y)
-      # update the message
-      msg = "playerTeleported %d %d\n" % (x, y)
-
-    # send the message to other players!
-    if (msg != ""):
-      print ("sending: ", msg,)
-      data.server.send(msg.encode())
+    pass
 
 def timerFired(data):
-    # timerFired receives instructions and executes them
     while (serverMsg.qsize() > 0):
-      msg = serverMsg.get(False)
-      try:
-        print("received: ", msg, "\n")
-        msg = msg.split()
-        command = msg[0]
-
-        if (command == "myIDis"):
-          myPID = msg[1]
-          data.me.changePID(myPID)
-
-        elif (command == "newPlayer"):
-          newPID = msg[1]
-          x = data.width/2
-          y = data.height/2
-          data.otherStrangers[newPID] = Dot(newPID, x, y)
-
-        elif (command == "playerMoved"):
-          PID = msg[1]
-          dx = int(msg[2])
-          dy = int(msg[3])
-          data.otherStrangers[PID].move(dx, dy)
-
-        elif (command == "playerTeleported"):
-          PID = msg[1]
-          x = int(msg[2])
-          y = int(msg[3])
-          data.otherStrangers[PID].teleport(x, y)
-      except:
-        print("failed")
-      serverMsg.task_done()
+        msg = serverMsg.get(False)
+        try:
+            print("received: ", msg, "\n")
+            msg = msg.split()
+            command = msg[0]
+            if(command == "myIDis"):
+                myPID = msg[1]
+              #data.me.changePID(myPID)
+            elif(command == "newPlayer"):
+                newPID = msg[1]
+                data.otherPlayers[newPID] = PlayerDeck(data.d1, data.d2)
+            elif(command == "playerPlayed"):
+                jsonValue = msg[1]
+                if(data.pBoard.winningBoard(0, 0)):
+                    data.gameOver = True
+            elif(command == "playerEnded"):
+                # Transfers move to next player
+                print("Player ended turn")
+        except:
+            print("failed")
+            serverMsg.task_done()
 
 def redrawAll(canvas, data):
-    # draw other players
-    for playerName in data.otherStrangers:
-      data.otherStrangers[playerName].drawDot(canvas, "blue")
-    # draw me
-    data.me.drawDot(canvas, "red")
+    if(data.gameOver):
+        canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
+    else:
+        #canvas.create_image(0, 0, anchor = NW, \
+        #                    image = data.pokerTableImg)
+        data.cardBoard.drawBoard(canvas)
+        ## Temp State ##
+        data.pBoard.drawPieces(canvas)
+        ## END ## 
+        data.playerCards.drawDeck(canvas)
+        canvas.create_rectangle(data.width - 50, data.height - 50, \
+                                data.width, data.height)
 
 ####################################
 # use the run function as-is
@@ -147,11 +162,11 @@ def run(width, height, serverMsg=None, server=None):
     data.width = width
     data.height = height
     data.timerDelay = 100 # milliseconds
-    init(data)
     # create the root and the canvas
     root = Tk()
     canvas = Canvas(root, width=data.width, height=data.height)
     canvas.pack()
+    init(data)
     # set up events
     root.bind("<Button-1>", lambda event:
                             mousePressedWrapper(event, canvas, data))
@@ -165,4 +180,4 @@ def run(width, height, serverMsg=None, server=None):
 serverMsg = Queue(100)
 threading.Thread(target = handleServerMsg, args = (server, serverMsg)).start()
 
-run(200, 200, serverMsg, server)
+run(1400, 810, serverMsg, server)

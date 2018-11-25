@@ -1,9 +1,10 @@
 import socket
 import threading
 from queue import Queue
+from sequence import * 
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10001 # Change each time you test
+PORT = 10003 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -47,15 +48,18 @@ def serverThread(clientele, serverChannel):
 clientele = dict()
 playerNum = 0
 
+pBoard = PieceBoard()
+gameOver = False
+
 serverChannel = Queue(100)
 threading.Thread(target = serverThread, args = (clientele, serverChannel)).start()
 
-names = ["Player1", "Player2", "Player3"]
+players = [1, 2, 3]
 
 while True:
   client, address = server.accept()
   # myID is the key to the client in the clientele dictionary
-  myID = names[playerNum]
+  myID = players[playerNum]
   print(myID, playerNum)
   for cID in clientele:
     print (repr(cID), repr(playerNum))

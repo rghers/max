@@ -38,12 +38,14 @@ def mousePressed(event, data):
             data.playerCards.removeCard(data.cardBoard.getCard(row, col))
             data.pBoard.fillPosInPieceBoard(row, col, \
                                             data.players[data.playerInd])
-            data.cardBoard.modifyCardColor(row, col, \
-                                           data.players[data.playerInd])
+            #data.cardBoard.getCard(row,col).convertColor()
+            #data.cardBoard.modifyCardColor(row, col, \
+                                           #data.players[data.playerInd])
 ##            data.cardBoard.getCard(row, col).convertColor(\
 ##                data.players[data.playerInd])
             data.pBoard.printBoard()
             print()
+            
         elif(data.pBoard.onPieceBoard(row, col) and\
              not data.pBoard.isValidPos(row, col) and\
              data.playerCards.hasOneEyedJack() and\
@@ -73,7 +75,7 @@ def redrawAll(canvas, data):
         #                    image = data.pokerTableImg)
         data.cardBoard.drawBoard(canvas, data.pBoard)
         ## Temp State ##
-        data.pBoard.drawPiece(canvas)
+        data.pBoard.drawPieces(canvas)
         ## END ## 
         data.playerCards.drawDeck(canvas)
         canvas.create_rectangle(data.width - 50, data.height - 50, \
