@@ -3,6 +3,7 @@
 from tkinter import *
 from PIL import Image, ImageTk, ImageOps
 import random
+import json
 
 # Adapted from course notes of OOPy 
 class Card(object):
@@ -403,11 +404,14 @@ class PieceBoard(object):
     ## END ##
 
     def refillPBoard(self, newBoard):
-        print("This is the new board: ")
+        newBoard = newBoard.replace('["', '')
+        newBoard = newBoard.replace('"]', '')
+        print("the new board")
         print(newBoard)
+        self.board = newBoard
         
 
-
+    
 
 
 

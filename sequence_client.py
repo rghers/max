@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10046
+PORT = 10069
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -12,17 +12,18 @@ server.connect((HOST,PORT))
 print("connected to server")
 
 def handleServerMsg(server, serverMsg):
-  server.setblocking(1)
-  msg = ""
-  command = ""
-  while True:
-    msg += server.recv(1024).decode("UTF-8")
-    command = msg.split("\n")
-    while (len(command) > 1):
-      readyMsg = command[0]
-      msg = "\n".join(command[1:])
-      serverMsg.put(readyMsg)
-      command = msg.split("\n")
+    print("recieved from server")
+    server.setblocking(1)
+    msg = ""
+    command = ""
+    while True:
+        msg += server.recv(1024).decode("UTF-8")
+        command = msg.split("\n")
+        while (len(command) > 1):
+            readyMsg = command[0]
+            msg = "\n".join(command[1:])
+            serverMsg.put(readyMsg)
+            command = msg.split("\n")
 
 # events-example0.py from 15-112 website
 # Barebones timer, mouse, and keyboard events
@@ -99,6 +100,7 @@ def keyPressed(event, data):
 def timerFired(data):
     while (serverMsg.qsize() > 0):
         msg = serverMsg.get(False)
+        
         try:
             print("received: ", msg, "\n")
             msg = msg.split()
@@ -111,13 +113,14 @@ def timerFired(data):
             elif(command == "playerPlayed"):
                 if(data.pBoard.winningBoard(0, 0)):
                     data.gameOver = True
+            elif(command == "boardFilled"):
+                print("This is the message from server to redraw")
+                # refill players boards
+                print(msg[1:])
+                data.pBoard.refillPBoard(msg[1:])
             elif(command == "playerEnded"):
                 # Transfers move to next player
                 print("Player ended turn")
-            elif(command == "boardFilled"):
-                print("Entered board fill")
-                # refill players boards
-                data.pBoard.refillPBoard(msg[1:])
         except:
             print("failed")
             serverMsg.task_done()
