@@ -292,6 +292,9 @@ class PieceBoard(object):
 ##        self.blueImg = blueImg.putalpha(125)
 ##        self.bluePic = ImageTk.PhotoImage(self.blueImg)
 
+    def __repr__(self):
+        return str(self.board)
+
     def convertCoordToPos(self, xCoord, yCoord):
         topLeftX = CardBoard.seperationX - Card.cardWidth // 2
         topLeftY = CardBoard.seperationY - Card.cardHeight // 2
@@ -374,12 +377,13 @@ class PieceBoard(object):
         for row in range(PieceBoard.amtRows):
             for col in range(PieceBoard.amtCols):
                 if(self.board[row][col] != 0):
+                    fillP = "purple"
                     ## Rectangle represents Piece ##
-                    if(self.board[row][col] == 1):
+                    if(self.board[row][col] == "1"):
                         fillP = "red"
-                    elif(self.board[row][col] == 2):
+                    elif(self.board[row][col] == "2"):
                         fillP = "blue"
-                    elif(self.board[row][col] == 3):
+                    elif(self.board[row][col] == "3"):
                         fillP = "green"
                     canvas.create_rectangle(CardBoard.seperationX + \
                                        Card.cardWidth * col - Card.cardWidth // 2,
@@ -389,7 +393,7 @@ class PieceBoard(object):
                                        Card.cardWidth * col + Card.cardWidth // 2,\
                                        CardBoard.seperationY + \
                                        Card.cardHeight * row + Card.cardHeight // 2,\
-                                       fill = fillP, activefill = "")
+                                       fill = fillP)
                     ## END ##
                         
                     #canvas.create_image(50, 50, image = self.bluePic)

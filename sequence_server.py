@@ -4,7 +4,7 @@ from queue import Queue
 from sequence import * 
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10003 # Change each time you test
+PORT = 10008 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 

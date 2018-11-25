@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10003
+PORT = 10008
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -46,6 +46,7 @@ def init(data):
     data.gameOver = False
     data.playedTurn = False
     data.pBoard = PieceBoard()
+    data.playerID = 0
 
 def endTurnClicked(data, x, y):
     return (data.width - 50 <= x <= data.width and\
@@ -62,28 +63,29 @@ def mousePressed(event, data):
             data.playedTurn = True
             data.playerCards.removeCard(data.cardBoard.getCard(row, col))
             data.pBoard.fillPosInPieceBoard(row, col, \
-                                            data.players[data.playerInd])
+                                            data.playerID)
             
             #data.cardBoard.getCard(row,col).convertColor()
             #data.cardBoard.modifyCardColor(row, col, \
                                            #data.players[data.playerInd])
 ##            data.cardBoard.getCard(row, col).convertColor(\
 ##                data.players[data.playerInd])
-  #          data.pBoard.printBoard()
- #           print()
-            msg = "playerPlayed "+json.dumps(data.pBoard)
+            data.pBoard.printBoard()
+            print()
+            #msg = "playerPlayed "+json.dumps(data.pBoard)
+            msg = "playerPlayed " + str(data.pBoard)
             print(msg)
         elif(data.pBoard.onPieceBoard(row, col) and\
              not data.pBoard.isValidPos(row, col) and\
              data.playerCards.hasOneEyedJack() and\
-             data.players[data.playerInd] != data.pBoard.getPlayer(row, col)):
+             data.playerID != data.pBoard.getPlayer(row, col)):
             data.playedTurn = True
             data.playerCards.removeCard(data.cardBoard.getCard(row, col))
             data.pBoard.fillPosInPieceBoard(row, col, 0)
-            msg = "playerPlayed "+json.dumps(data.pBoard)
+            #msg = "playerPlayed "+json.dumps(data.pBoard)
+            msg = "playerPlayed " + str(data.pBoard)
             print(msg)
         elif(endTurnClicked(data, event.x, event.y)):
-            data.playerInd = (data.playerInd + 1) % len(data.players)
             data.playedTurn = False
             msg = "playerEnded"
             print(msg)
@@ -101,8 +103,7 @@ def timerFired(data):
             msg = msg.split()
             command = msg[0]
             if(command == "myIDis"):
-                myPID = msg[1]
-              #data.me.changePID(myPID)
+                data.playerID = msg[1]
             elif(command == "newPlayer"):
                 newPID = msg[1]
                 data.otherPlayers[newPID] = PlayerDeck(data.d1, data.d2)
