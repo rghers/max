@@ -4,7 +4,7 @@ from queue import Queue
 from sequence import * 
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10030 # Change each time you test
+PORT = 10046 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -13,7 +13,8 @@ server.listen(BACKLOG)
 print("looking for connection")
 
 def fillPBoard(msg):
-    #print("This is inside of filling: ", msg)
+    print("This is how the board looks before filling: ")
+    pBoard.printBoard()
     msg = msg.split(" [[")
     matrixMsg = msg[1]
     print("This is inside of filling only matrix list: ", matrixMsg)       
@@ -24,18 +25,23 @@ def fillPBoard(msg):
     print("This is inside of filling only matrix: ", matrixMsg)
     counter = 0
     matrixLen = 10
-    print("This is how the board looks before filling: ")
-    pBoard.printBoard()
     for row in range(matrixLen):
         print("inside row")
         for col in range(matrixLen):
             print("inside col")
             print("(", row, col, "): ", pBoard.getPlayer(row, col))
-            if(pBoard.getPlayer(row, col) == '0' and \
-               matrixMsg[counter] != "'0'"):
-                print("inside if")
-                pBoard.setPlayer(row, col, matrixMsg[counter])
+            print(type(pBoard.getPlayer(row, col)))
+            if(pBoard.getPlayer(row, col) != '0'):
+                pBoard.setPlayer(row, col, pBoard.getPlayer(row, col))
+            else:
+                if(matrixMsg[counter] == "'1'"):
+                    pBoard.setPlayer(row, col, '1')
+                elif(matrixMsg[counter] == "'2'"):
+                    pBoard.setPlayer(row, col, '2')
+                elif(matrixMsg[counter] == "'3'"):
+                    pBoard.setPlayer(row, col, '3')
             counter += 1
+
     print("This is after filling: ")
     print(pBoard)
     
@@ -57,6 +63,10 @@ def handleClient(client, serverChannel, cID, clientele):
                 serverChannel.put(str(cID) + " " + readyMsg)
                 command = msg.split("\n")
             fillPBoard(msg)
+            msg = "boardFilled " + str(pBoard)
+            #msg = "Test"
+            print("this is the message to send to client: ",msg)
+            client.send(msg.encode())
         except:
             # we failed
             return

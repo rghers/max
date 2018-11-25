@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10030
+PORT = 10046
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -109,12 +109,15 @@ def timerFired(data):
                 newPID = msg[1]
                 data.otherPlayers[newPID] = PlayerDeck(data.d1, data.d2)
             elif(command == "playerPlayed"):
-                jsonValue = msg[1]
                 if(data.pBoard.winningBoard(0, 0)):
                     data.gameOver = True
             elif(command == "playerEnded"):
                 # Transfers move to next player
                 print("Player ended turn")
+            elif(command == "boardFilled"):
+                print("Entered board fill")
+                # refill players boards
+                data.pBoard.refillPBoard(msg[1:])
         except:
             print("failed")
             serverMsg.task_done()

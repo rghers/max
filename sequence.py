@@ -400,7 +400,12 @@ class PieceBoard(object):
                     ## END ##
                         
                     #canvas.create_image(50, 50, image = self.bluePic)
-    ## END ## 
+    ## END ##
+
+    def refillPBoard(self, newBoard):
+        print("This is the new board: ")
+        print(newBoard)
+        
 
 
 
