@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10069
+PORT = 10070
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

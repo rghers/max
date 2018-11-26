@@ -404,11 +404,38 @@ class PieceBoard(object):
     ## END ##
 
     def refillPBoard(self, newBoard):
-        newBoard = newBoard.replace('["', '')
-        newBoard = newBoard.replace('"]', '')
-        print("the new board")
+        print('in refillPBoard getting the newBoard to be')
+        print("this is the original board")
+        print(self.board)
+        print("qqqqqqqqqqqqqqqqq")
+        print('this is the newBoard to be')
         print(newBoard)
-        self.board = newBoard
+        print("hhhhhhhhhhhhhhhhhh")
+        nB= newBoard[0]
+        nB = nB.replace(', ', ',')
+        nB = nB.replace('[[', '')
+        nB = nB.replace(']]', '')
+        nB = nB.replace('[', '')
+        nB = nB.replace(']', '')
+        nB = nB.replace("'", "")
+        print("This is nB cleaned: ", nB)
+        print("zzzzzzzzzzzzzzzzz")
+        nB = nB.split(",")
+        print("This is nB splited: ", nB)
+        print("tttttttttttttttt")
+        counter = 0
+        matrixLen = 10
+        for row in range(matrixLen):
+            print("inside row")
+            for col in range(matrixLen):
+                print("inside col")
+                print("original value of self.board[row,col]: ",self.board[row][col])
+                print("to be replaced by nB[counter]: ",  nB[counter])
+                self.board[row][col]= nB[counter]
+                counter += 1
+        print("This board after replaced: ")
+        print(self.board)
+        print("board replaced")
         
 
     
