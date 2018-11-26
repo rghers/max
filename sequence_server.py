@@ -5,7 +5,7 @@ from sequence import *
 import json
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10079 # Change each time you test
+PORT = 10083 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 

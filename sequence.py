@@ -436,6 +436,77 @@ class PieceBoard(object):
         print("This board after replaced: ")
         print(self.board)
         print("board replaced")
+
+
+class Btn(object):
+
+    def __init__(self, imageFile, xPos, yPos, width, height):
+        self.imageFile = imageFile
+        self.width = width
+        self.height = height
+        self.img = Image.open(self.filename)
+        self.img.resize((self,width, self.height))
+        self.picture = ImageTk.PhotoImage(self.img)
+        self.xPos = xPos
+        self.yPos = yPos
+
+
+    def drawBtn(self, canvas):
+        canvas.create_image(self.xPos, self.yPos, image = self.picture)
+
+    def buttonClicked(self, xClicked, yClicked):
+        leftBound = self.xPos - self.width // 2
+        rightBound = self.xPos + self.width // 2
+        topBound = self.yPos - self.height // 2
+        botBound = self.yPos + self.height // 2
+        if(leftBound <= xClicked <= rightBound and \
+           topBound <= yClicked <= botBound):
+            return True
+        return False
+
+class NewCardBtn(Btn):
+
+    def __init__(self, xPos, yPos):
+        self.xPos = xPos
+        self.yPos = yPos
+        self.width = Card.cardWidth
+        self.height = Card.cardHeight
+        self.imageFile = "playing-card-gifs/x1.gif"
+        self.img = Image.open(self.imageFile)
+        self.img = self.img.resize((self.width, self.height))
+        self.picture = ImageTk.PhotoImage(self.img)
+
+    def buttonAction(self, playerCards, d1, d2):
+        tempHand = playerCards.getCards()
+        randDeck = random.randint(0, 1)
+        if(randDeck == 0):
+            card = d1.getRandomCard()
+        if(randDeck == 1):
+            card = d2.getRandomCard()
+        tempHand.append(card)
+        return tempHand
+        
+
+
+class EndTurnBtn(Btn):
+    
+    def __init__(self, imageFile, xPos, yPos, width, height):
+        super().__init__(imageFile, xPos, yPos, width, height)
+        self.img = Image.open(self.imageFile)
+        self.img = self.img.resize((self.width, self.height))
+        self.picture = ImageTk.PhotoImage(self.img)
+
+
+    def buttonAction(self, player):
+        pass
+        
+
+
+
+
+        
+
+    
         
 
     
