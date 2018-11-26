@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10070
+PORT = 10079
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -138,6 +138,7 @@ def redrawAll(canvas, data):
         data.playerCards.drawDeck(canvas)
         canvas.create_rectangle(data.width - 50, data.height - 50, \
                                 data.width, data.height)
+        
 
 ####################################
 # use the run function as-is
@@ -159,9 +160,12 @@ def run(width, height, serverMsg=None, server=None):
 
     def timerFiredWrapper(canvas, data):
         timerFired(data)
+        # add title to board
+        root.title("Player: "+str(data.playerID))
         redrawAllWrapper(canvas, data)
         # pause, then call timerFired again
         canvas.after(data.timerDelay, timerFiredWrapper, canvas, data)
+        
     # Set up data and call init
     class Struct(object): pass
     data = Struct()
@@ -172,8 +176,26 @@ def run(width, height, serverMsg=None, server=None):
     data.timerDelay = 100 # milliseconds
     # create the root and the canvas
     root = Tk()
-    canvas = Canvas(root, width=data.width, height=data.height)
-    canvas.pack()
+    # -------- MAKE A SCROLLABLE WINDOW ------------
+    # Define the scroll limits
+    scrollLimitLow=100
+    scrollLimit=300
+    # Define a frame for the root
+    frame=Frame(root,width=scrollLimit,height=scrollLimit)
+    frame.grid(row=0,column=0)
+    # Define scroll region for the Canvas and instantiate in the frame
+    canvas = Canvas(frame, width=data.width, height=data.height, scrollregion=(0,0,data.width+scrollLimitLow,data.height+scrollLimitLow))
+    # Setup properties of scroll bars
+    hbar=Scrollbar(frame,orient=HORIZONTAL)
+    hbar.pack(side=BOTTOM,fill=X)
+    hbar.config(command=canvas.xview)
+    vbar=Scrollbar(frame,orient=VERTICAL)
+    vbar.pack(side=RIGHT,fill=Y)
+    vbar.config(command=canvas.yview)
+    canvas.config(width=data.width-scrollLimit,height=data.height-scrollLimitLow)
+    canvas.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
+    canvas.pack(side=LEFT,expand=True,fill=BOTH)
+    # ----------------------------------------------
     init(data)
     # set up events
     root.bind("<Button-1>", lambda event:
@@ -181,6 +203,7 @@ def run(width, height, serverMsg=None, server=None):
     root.bind("<Key>", lambda event:
                             keyPressedWrapper(event, canvas, data))
     timerFiredWrapper(canvas, data)
+    
     # and launch the app
     root.mainloop()  # blocks until window is closed
     print("bye!")
