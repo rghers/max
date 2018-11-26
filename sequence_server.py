@@ -68,7 +68,10 @@ def handleClient(client, serverChannel, cID, clientele):
             msg= msg.replace(", ",",")
  #           msg = "boardFilled Test"
             print("this is the message to send to client: ",msg)
-            client.send(msg.encode())
+            for cID in clientele:
+                print ("this client will get new board: ",repr(cID), repr(playerNum))
+                clientele[cID].send(msg.encode())
+            #client.send(msg.encode())
         except:
             # we failed
             return
