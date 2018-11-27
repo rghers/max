@@ -375,7 +375,14 @@ class PieceBoard(object):
     def setPlayer(self, row, col, player):
         self.board[row][col] = player
 
-
+    def isCornerPiece(self, row, col):
+        if((row == 0 and col == 0) or \
+           (row == 0 and col == PieceBoard.amtCols- 1) or \
+           (row == PieceBoard.amtRows - 1 and col == PieceBoard.amtCols - 1) or\
+           (row == PieceBoard.amtRows - 1 and col == 0)):
+            return True
+        return False
+    
     ## TEMP STATE ##
     def drawPieces(self, canvas):
         for row in range(PieceBoard.amtRows):

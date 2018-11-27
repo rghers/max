@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10128
+PORT = 10129
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -61,6 +61,15 @@ def mousePressed(event, data):
     if(data.playerID == data.currPlayer):
         if(not data.playedTurn):
             if(data.pBoard.onPieceBoard(row, col) and\
+               data.pBoard.isValidPos(row, col) and\
+               data.pBoard.isCornerPiece(row, col)):
+                data.playedTurn = True
+                data.receivedCard = True
+                data.pBoard.fillPosInPieceBoard(row, col, \
+                                                data.playerID)
+                msg = "playerPlayed " + str(data.pBoard)
+                print(msg)
+            elif(data.pBoard.onPieceBoard(row, col) and\
                data.pBoard.isValidPos(row, col) and\
                (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
                 data.playerCards.hasTwoEyedJack())):
