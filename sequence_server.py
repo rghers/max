@@ -5,7 +5,7 @@ from sequence import *
 import json
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10083 # Change each time you test
+PORT = 10093 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -45,7 +45,14 @@ def fillPBoard(msg):
 
     print("This is after filling: ")
     print(pBoard)
-    
+
+def getNextPlayer(currPlayer):
+    if(currPlayer == "1"):
+        return "2"
+    elif(currPlayer == "2"):
+        return "3"
+    else:
+        return "1"
 
 def handleClient(client, serverChannel, cID, clientele):
     client.setblocking(1)
@@ -63,14 +70,23 @@ def handleClient(client, serverChannel, cID, clientele):
                 msg = "\n".join(command[1:])
                 serverChannel.put(str(cID) + " " + readyMsg)
                 command = msg.split("\n")
-            fillPBoard(msg)
-            msg = "boardFilled " + str(pBoard) + "\n"
-            msg= msg.replace(", ",",")
- #           msg = "boardFilled Test"
-            print("this is the message to send to client: ",msg)
-            for cID in clientele:
-                print ("this client will get new board: ",repr(cID), repr(playerNum))
-                clientele[cID].send(msg.encode())
+            if(readyMsg != "playerEnded"):
+                fillPBoard(msg)
+                msg = "boardFilled " + str(pBoard) + "\n"
+                msg= msg.replace(", ",",")
+     #           msg = "boardFilled Test"
+                print("this is the message to send to client: ",msg)
+                for cID in clientele:
+                    print ("this client will get new board: ",repr(cID), repr(playerNum))
+                    clientele[cID].send(msg.encode())
+            else:
+                nextPlayer = getNextPlayer(msg.split(" ")[1])
+                msg = "nextPlayer " + nextPlayer + "\n"
+                print("this is the message to send to client: ",msg)
+                for cID in clientele:
+                    print ("this client will get new player: ",repr(cID), repr(playerNum))
+                    clientele[cID].send(msg.encode())
+                
             #client.send(msg.encode())
         except:
             # we failed

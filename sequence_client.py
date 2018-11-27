@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10083
+PORT = 10093
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -51,56 +51,62 @@ def init(data):
     data.playerID = 0
     data.getCardBtn = NewCardBtn(data.width - 2 * Card.cardWidth, \
                                  data.height // 2)
+    data.endTurnBtn = Btn("end.png", data.width - 25, \
+                                  data.height - 25, 50, 50)
+    data.currPlayer = "1"
 
-def endTurnClicked(data, x, y):
-    return (data.width - 50 <= x <= data.width and\
-            data.height - 50 <= y <= data.height)
+
 
 def mousePressed(event, data):
     msg = ""
-    row,col = data.pBoard.convertCoordToPos(event.x, event.y)
-    if(not data.playedTurn):
-        if(data.pBoard.onPieceBoard(row, col) and\
-           data.pBoard.isValidPos(row, col) and\
-           (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
-            data.playerCards.hasTwoEyedJack())):
-            data.playedTurn = True
-            data.playerCards.removeCard(data.cardBoard.getCard(row, col))
-            data.pBoard.fillPosInPieceBoard(row, col, \
-                                            data.playerID)
-            
-            
-            #data.cardBoard.getCard(row,col).convertColor()
-            #data.cardBoard.modifyCardColor(row, col, \
-                                           #data.players[data.playerInd])
-##            data.cardBoard.getCard(row, col).convertColor(\
-##                data.players[data.playerInd])
-            data.pBoard.printBoard()
-            print()
-            #msg = "playerPlayed "+json.dumps(data.pBoard)
-            msg = "playerPlayed " + str(data.pBoard)
-            print(msg)
-        elif(data.pBoard.onPieceBoard(row, col) and\
-             not data.pBoard.isValidPos(row, col) and\
-             data.playerCards.hasOneEyedJack() and\
-             data.playerID != data.pBoard.getPlayer(row, col)):
-            data.playedTurn = True
-            data.playerCards.removeCard(data.cardBoard.getCard(row, col))
-            data.pBoard.fillPosInPieceBoard(row, col, 0)
-            #msg = "playerPlayed "+json.dumps(data.pBoard)
-            msg = "playerPlayed " + str(data.pBoard)
-            print(msg)
-        elif(endTurnClicked(data, event.x, event.y)):
+    row, col = data.pBoard.convertCoordToPos(event.x, event.y)
+    if(data.playerID == data.currPlayer):
+        print("entered")
+        if(not data.playedTurn):
+            if(data.pBoard.onPieceBoard(row, col) and\
+               data.pBoard.isValidPos(row, col) and\
+               (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
+                data.playerCards.hasTwoEyedJack())):
+                data.playedTurn = True
+                data.playerCards.removeCard(data.cardBoard.getCard(row, col))
+                data.pBoard.fillPosInPieceBoard(row, col, \
+                                                data.playerID)
+                
+                
+                #data.cardBoard.getCard(row,col).convertColor()
+                #data.cardBoard.modifyCardColor(row, col, \
+                                               #data.players[data.playerInd])
+    ##            data.cardBoard.getCard(row, col).convertColor(\
+    ##                data.players[data.playerInd])
+                data.pBoard.printBoard()
+                print()
+                #msg = "playerPlayed "+json.dumps(data.pBoard)
+                msg = "playerPlayed " + str(data.pBoard)
+                print(msg)
+            elif(data.pBoard.onPieceBoard(row, col) and\
+                 not data.pBoard.isValidPos(row, col) and\
+                 data.playerCards.hasOneEyedJack() and\
+                 data.playerID != data.pBoard.getPlayer(row, col)):
+                data.playedTurn = True
+                data.playerCards.removeCard(data.cardBoard.getCard(row, col))
+                data.pBoard.fillPosInPieceBoard(row, col, 0)
+                #msg = "playerPlayed "+json.dumps(data.pBoard)
+                msg = "playerPlayed " + str(data.pBoard)
+                print(msg)
+        elif(data.getCardBtn.buttonClicked(event.x, event.y) and \
+             not data.receivedCard):
+            print("player wants new card")
+            data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
+            data.receivedCard = True
+        elif(data.endTurnBtn.buttonClicked(event.x, event.y)):
             data.playedTurn = False
-            msg = "playerEnded"
+            data.receivedCard = False
+            msg = "playerEnded " +  data.playerID
             print(msg)
         if(msg != ""):
             data.server.send(msg.encode())
-    elif(data.getCardBtn.buttonClicked(event.x, event.y) and \
-         not data.receivedCard):
-        print("player wants new card")
-        data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
-        data.receivedCard = True
+    else:
+        print("Not your turn")
 
 def keyPressed(event, data):
     pass
@@ -108,7 +114,6 @@ def keyPressed(event, data):
 def timerFired(data):
     while (serverMsg.qsize() > 0):
         msg = serverMsg.get(False)
-        
         try:
             print("received: ", msg, "\n")
             msg = msg.split()
@@ -126,8 +131,9 @@ def timerFired(data):
                 # refill players boards
                 print(msg[1:])
                 data.pBoard.refillPBoard(msg[1:])
-            elif(command == "playerEnded"):
+            elif(command == "nextPlayer"):
                 # Transfers move to next player
+                data.currPlayer = msg[1]
                 print("Player ended turn")
         except:
             print("failed")

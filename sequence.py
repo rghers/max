@@ -444,8 +444,8 @@ class Btn(object):
         self.imageFile = imageFile
         self.width = width
         self.height = height
-        self.img = Image.open(self.filename)
-        self.img.resize((self,width, self.height))
+        self.img = Image.open(self.imageFile)
+        self.img.resize((self.width, self.height))
         self.picture = ImageTk.PhotoImage(self.img)
         self.xPos = xPos
         self.yPos = yPos
@@ -488,18 +488,6 @@ class NewCardBtn(Btn):
         
 
 
-class EndTurnBtn(Btn):
-    
-    def __init__(self, imageFile, xPos, yPos, width, height):
-        super().__init__(imageFile, xPos, yPos, width, height)
-        self.img = Image.open(self.imageFile)
-        self.img = self.img.resize((self.width, self.height))
-        self.picture = ImageTk.PhotoImage(self.img)
-
-
-    def buttonAction(self, player):
-        pass
-        
 
 
 
