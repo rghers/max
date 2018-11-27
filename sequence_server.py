@@ -5,7 +5,7 @@ from sequence import *
 import json
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10111 # Change each time you test
+PORT = 10128 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -14,37 +14,35 @@ server.listen(BACKLOG)
 print("looking for connection")
 
 def fillPBoard(msg):
-    print("This is how the board looks before filling: ")
-    pBoard.printBoard()
     msg = msg.split(" [[")
-    matrixMsg = msg[1]
-    print("This is inside of filling only matrix list: ", matrixMsg)       
+    matrixMsg = msg[1]      
     matrixMsg = matrixMsg.replace("], [", ", ")
     matrixMsg = matrixMsg.replace("]]", "")
-    print("This is inside of filling only matrix list cleaned: ", matrixMsg)
     matrixMsg = matrixMsg.split(", ")
-    print("This is inside of filling only matrix: ", matrixMsg)
     counter = 0
     matrixLen = 10
     for row in range(matrixLen):
-        print("inside row")
         for col in range(matrixLen):
-            print("inside col")
-            print("(", row, col, "): ", pBoard.getPlayer(row, col))
-            print(type(pBoard.getPlayer(row, col)))
             if(pBoard.getPlayer(row, col) != '0'):
-                pBoard.setPlayer(row, col, pBoard.getPlayer(row, col))
+                if(matrixMsg[counter] == "'0'" or \
+                     matrixMsg[counter] == '0'):
+                    pBoard.setPlayer(row, col, '0')
+                else:
+                    pBoard.setPlayer(row, col, pBoard.getPlayer(row, col))
             else:
-                if(matrixMsg[counter] == "'1'"):
+                if(matrixMsg[counter] == "'1'" or \
+                   matrixMsg[counter] == '1'):
                     pBoard.setPlayer(row, col, '1')
-                elif(matrixMsg[counter] == "'2'"):
+                elif(matrixMsg[counter] == "'2'" or \
+                     matrixMsg[counter] == '2'):
                     pBoard.setPlayer(row, col, '2')
-                elif(matrixMsg[counter] == "'3'"):
+                elif(matrixMsg[counter] == "'3'" or \
+                     matrixMsg[counter] == '3'):
                     pBoard.setPlayer(row, col, '3')
+                elif(matrixMsg[counter] == "'0'" or \
+                     matrixMsg[counter] == '0'):
+                    pBoard.setPlayer(row, col, '0')
             counter += 1
-
-    print("This is after filling: ")
-    print(pBoard)
 
 def getNextPlayer(currPlayer):
     if(currPlayer == "1"):
@@ -60,47 +58,28 @@ def handleClient(client, serverChannel, cID, clientele):
     while True:
         try:
             msg = client.recv(1024).decode("UTF-8")
-            print("_____start____")
-            print(msg)
-            print("______end_____")
             command = msg.split("\n")
-            print("This is command", command)
             while (len(command) > 1):
                 readyMsg = command[0]
                 msg = "\n".join(command[1:])
                 serverChannel.put(str(cID) + " " + readyMsg)
                 command = msg.split("\n")
-            print("This is command after while loop", command)
-            print("This is msg after while loop", msg)
-            print("This is command[0]", command[0])
             tempMsg = command
             tempMsg = command[0].split(" ")
             if(tempMsg[0] == "playerPlayed"):
-                print("Inside playerPlayed")
                 fillPBoard(msg)
                 msg = "boardFilled " + str(pBoard) + "\n"
                 msg = msg.replace(", ",",")
-                #msg = "boardFilled Test"
-                print("this is the message to send to client: ", msg)
                 for cID in clientele:
-                    print ("this client will get new board: ",repr(cID), repr(playerNum))
                     clientele[cID].send(msg.encode())
             elif(tempMsg[0] == "playerEnded"):
-                print("inside playerEnded")
-                print("server received player ended")
                 nextPlayer = getNextPlayer(msg.split(" ")[1])
-                print("This is the next player", nextPlayer)
                 msg = "nextPlayer " + nextPlayer + "\n"
-                print("this is the message to send to client: ",msg)
                 for cID in clientele:
-                    print ("this client will get new player: ", \
-                           repr(cID), repr(playerNum))
                     clientele[cID].send(msg.encode())
-
-                
-            #client.send(msg.encode())
         except:
             # we failed
+            print("client handle of server failed")
             return
 
 def serverThread(clientele, serverChannel):
@@ -136,7 +115,6 @@ while True:
     client, address = server.accept()
     # myID is the key to the client in the clientele dictionary
     myID = players[playerNum]
-    print(myID, playerNum)
     for cID in clientele:
         print (repr(cID), repr(playerNum))
         clientele[cID].send(("newPlayer %s\n" % myID).encode())
