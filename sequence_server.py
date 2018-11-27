@@ -5,7 +5,7 @@ from sequence import *
 import json
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10093 # Change each time you test
+PORT = 10111 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -59,33 +59,44 @@ def handleClient(client, serverChannel, cID, clientele):
     msg = ""
     while True:
         try:
-            msg += client.recv(1024).decode("UTF-8")
+            msg = client.recv(1024).decode("UTF-8")
             print("_____start____")
             print(msg)
             print("______end_____")
             command = msg.split("\n")
+            print("This is command", command)
             while (len(command) > 1):
-                
                 readyMsg = command[0]
                 msg = "\n".join(command[1:])
                 serverChannel.put(str(cID) + " " + readyMsg)
                 command = msg.split("\n")
-            if(readyMsg != "playerEnded"):
+            print("This is command after while loop", command)
+            print("This is msg after while loop", msg)
+            print("This is command[0]", command[0])
+            tempMsg = command
+            tempMsg = command[0].split(" ")
+            if(tempMsg[0] == "playerPlayed"):
+                print("Inside playerPlayed")
                 fillPBoard(msg)
                 msg = "boardFilled " + str(pBoard) + "\n"
-                msg= msg.replace(", ",",")
-     #           msg = "boardFilled Test"
-                print("this is the message to send to client: ",msg)
+                msg = msg.replace(", ",",")
+                #msg = "boardFilled Test"
+                print("this is the message to send to client: ", msg)
                 for cID in clientele:
                     print ("this client will get new board: ",repr(cID), repr(playerNum))
                     clientele[cID].send(msg.encode())
-            else:
+            elif(tempMsg[0] == "playerEnded"):
+                print("inside playerEnded")
+                print("server received player ended")
                 nextPlayer = getNextPlayer(msg.split(" ")[1])
+                print("This is the next player", nextPlayer)
                 msg = "nextPlayer " + nextPlayer + "\n"
                 print("this is the message to send to client: ",msg)
                 for cID in clientele:
-                    print ("this client will get new player: ",repr(cID), repr(playerNum))
+                    print ("this client will get new player: ", \
+                           repr(cID), repr(playerNum))
                     clientele[cID].send(msg.encode())
+
                 
             #client.send(msg.encode())
         except:

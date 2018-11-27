@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10093
+PORT = 10111
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -101,7 +101,7 @@ def mousePressed(event, data):
         elif(data.endTurnBtn.buttonClicked(event.x, event.y)):
             data.playedTurn = False
             data.receivedCard = False
-            msg = "playerEnded " +  data.playerID
+            msg = "playerEnded " +  data.playerID 
             print(msg)
         if(msg != ""):
             data.server.send(msg.encode())
