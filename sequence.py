@@ -9,7 +9,7 @@ import json
 class Card(object):
     numberNames = [None, "Ace", "2", "3", "4", "5", "6", "7",
                    "8", "9", "10", "Jack", "Queen", "King"]
-    suitNames = ["Clubs", "Diamonds", "Hearts", "Spades"]
+    suitNames = ["Clubs", "Diamonds", "Hearts", "Spades", "x"]
     CLUBS = 0
     DIAMONDS = 1
     HEARTS = 2
@@ -17,7 +17,7 @@ class Card(object):
     cardHeight = 71
     cardWidth = 96
     
-    def __init__(self, number, suit):
+    def __init__(self, number = 2, suit = 4):
         # number is 1 for Ace, 2...10,
         #           11 for Jack, 12 for Queen, 13 for King
         # suit is 0 for Clubs, 1 for Diamonds,
@@ -118,7 +118,7 @@ class Deck(object):
     def createDeck(self):
         cards = []
         for rank in range(len(Card.numberNames)):
-            for suit in range(len(Card.suitNames)):
+            for suit in range(len(Card.suitNames) - 1):
                 if(rank != 0):
                     card = Card(rank, suit)
                     cards.append(card)
@@ -180,7 +180,7 @@ class CardBoard(object):
         for row in range(len(self.board)):
             for col in range(len(self.board[0])):
                 if(self.board[row][col] == (-1, -1)):
-                    self.board[row][col] = Card(1, 3)
+                    self.board[row][col] = Card()
                 else:
                     self.board[row][col] = Card(self.board[row][col][0],\
                                             self.board[row][col][1])
