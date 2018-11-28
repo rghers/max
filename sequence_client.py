@@ -7,7 +7,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10156
+PORT = 10163
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -59,70 +59,90 @@ def init(data):
     data.endTurnBtn = Btn("red", "End Turn", data.width - data.margin, \
                                   data.height - data.margin)
     data.currPlayer = "1"
+    data.winner = "0"
 
 
+def playerClickedHandCardEvent(data, xCoord, yCoord):
+    # get the card
+    cardInd = data.playerCards.clickedHandCard(xCoord, yCoord)
+    card = data.playerCards.getCard(cardInd)
+    # Find location of card in CardBoard
+    positions = data.cardBoard.locateCard(card)
+    print(positions)
+    loc1 = positions[0]
+    loc1R = loc1[0]
+    loc1C = loc1[1]
+    loc2 = positions[1]
+    loc2R = loc2[0]
+    loc2C = loc2[1]
+    # Check if positions in piece board are filled
+    if(len(positions) != 0 and \
+       data.pBoard.getPlayer(loc1R, loc1C) != "0" and\
+       data.pBoard.getPlayer(loc2R, loc2C) != "0"):
+        # Remove Card from hand
+        data.playerCards.removeClickedHandCard(card)
+        # Give player a new card
+        data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
+
+def playerPlayedCornerPiece(data, row, col):
+    data.playedTurn = True
+    data.receivedCard = True
+    data.pBoard.fillPosInPieceBoard(row, col, data.playerID)
+
+def playerPlayedPiece(data, row, col):
+    data.playedTurn = True
+    data.playerCards.removeCard(data.cardBoard.getCard(row, col), "two")
+    data.pBoard.fillPosInPieceBoard(row, col, data.playerID)
+
+def playerRemovedPiece(data, row, col):
+    data.playedTurn = True
+    data.playerCards.removeCard(data.cardBoard.getCard(row, col), "one")
+    data.pBoard.fillPosInPieceBoard(row, col, "0")
 
 def mousePressed(event, data):
     msg = ""
     row, col = data.pBoard.convertCoordToPos(event.x, event.y)
+    # Checks if this player is current player
     if(data.playerID == data.currPlayer):
+        # Checks if a player clicked a card in their deck (attempting)
+        # to replace a card with no available positions.
         if(data.playerCards.clickedHandCard(event.x, event.y) > 0):
-            # get the card
-            cardInd = data.playerCards.clickedHandCard(event.x, event.y)
-            card = data.playerCards.getCard(cardInd)
-            # Find location of card in CardBoard
-            positions = data.cardBoard.locateCard(card)
-            print(positions)
-            loc1 = positions[0]
-            loc1R = loc1[0]
-            loc1C = loc1[1]
-            loc2 = positions[1]
-            loc2R = loc2[0]
-            loc2C = loc2[1]
-            # Check if positions in piece board are filled
-            if(len(positions) != 0 and \
-               data.pBoard.getPlayer(loc1R, loc1C) != "0" and\
-               data.pBoard.getPlayer(loc2R, loc2C) != "0"):
-                # Remove Card from hand
-                data.playerCards.removeClickedHandCard(card)
-                # Give player a new card
-                data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
+            playerClickedHandCardEvent(data, event.x, event.y)
+        # Checks if the player has not played thier turn yet
         elif(not data.playedTurn):
+            # Checks if a player played a piece in a corner position
             if(data.pBoard.onPieceBoard(row, col) and\
                data.pBoard.isValidPos(row, col) and\
                data.pBoard.isCornerPiece(row, col)):
-                data.playedTurn = True
-                data.receivedCard = True
-                data.pBoard.fillPosInPieceBoard(row, col, \
-                                                data.playerID)
+                playerPlayedCornerPiece(data, row, col)
                 msg = "playerPlayed " + str(data.pBoard)
+                if(data.pBoard.winningBoard(0, 0)):
+                    msg = "gameOver " + data.playerID
                 print(msg)
+            # Checks if a player played a piece in a non-corner position
             elif(data.pBoard.onPieceBoard(row, col) and\
                data.pBoard.isValidPos(row, col) and\
                (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
                 data.playerCards.hasTwoEyedJack())):
-                data.playedTurn = True
-                data.playerCards.removeCard(data.cardBoard.getCard(row, col), \
-                                            "two")
-                data.pBoard.fillPosInPieceBoard(row, col, \
-                                                data.playerID)
+                playerPlayedPiece(data, row, col)
                 msg = "playerPlayed " + str(data.pBoard)
+                if(data.pBoard.winningBoard(0, 0)):
+                    msg = "gameOver " + data.playerID
                 print(msg)
+            # Checks if a player tried to remove someone else's piece
             elif(data.pBoard.onPieceBoard(row, col) and\
                  not data.pBoard.isValidPos(row, col) and\
                  data.playerCards.hasOneEyedJack() and\
                  data.playerID != data.pBoard.getPlayer(row, col)):
-                print("entered one eyed jack case")
-                data.playedTurn = True
-                data.playerCards.removeCard(data.cardBoard.getCard(row, col), \
-                                            "one")
-                data.pBoard.fillPosInPieceBoard(row, col, "0")
+                playerRemovedPiece(data, row, col)
                 msg = "playerPlayed " + str(data.pBoard)
                 print(msg)
+        # Checks if a player wants to get a new card after playing a turn
         elif(data.getCardBtn.buttonClicked(event.x, event.y) and \
              not data.receivedCard):
             data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
             data.receivedCard = True
+        # Checks if a player wants to end their turn
         elif(data.endTurnBtn.buttonClicked(event.x, event.y)):
             data.playedTurn = False
             data.receivedCard = False
@@ -148,14 +168,15 @@ def timerFired(data):
             elif(command == "newPlayer"):
                 newPID = msg[1]
                 data.otherPlayers[newPID] = PlayerDeck(data.d1, data.d2)
-            elif(command == "playerPlayed"):
+            elif(command == "gameOver"):
                 # I think here i need to get a message from the server
                 # saying gameEnded, and rather check after a playerPlayed
                 # in mouse clicked if the game is over. If it's over then send
                 # a modified message to server so that it can process message
                 # and send out to all servers. Then here change gameOver to true
-                if(data.pBoard.winningBoard(0, 0)):
-                    data.gameOver = True
+                #if(data.pBoard.winningBoard(0, 0)):
+                data.gameOver = True
+                data.winner = msg[1]
             elif(command == "boardFilled"):
                 # refill players boards
                 data.pBoard.refillPBoard(msg[1:])
@@ -188,9 +209,28 @@ def displayPlayerTurn(canvas, data):
         canvas.create_text(textX, textY, text = "Player 3's Turn", \
                            font = "Arial 32 bold", fill = "green")
 
+
+def drawWinnerScreen(canvas, data):
+    if(data.winner == "1"):
+        canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
+    elif(data.winner == "2"):
+        canvas.create_rectangle(0, 0, data.width, data.height, fill = "blue")
+    else:
+        canvas.create_rectangle(0, 0, data.width, data.height, fill = "green")
+    if(data.winner == data.playerID):
+        canvas.create_text(data.width // 2, data.height // 2, \
+                           text = "You Won!", font = "Arial 32 bold", \
+                           fill = "white")
+    else:
+        canvas.create_text(data.width // 2, data.height // 2, \
+                           text = "You Lost. Player " + data.winner + " won", \
+                           font = "Arial 32 bold", fill = "white")
+
 def redrawAll(canvas, data):
     if(data.gameOver):
-        canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
+        drawWinnerScreen(canvas, data)
+       #canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
+    
     else:
         #canvas.create_image(0, 0, anchor = NW, \
         #                    image = data.pokerTableImg)

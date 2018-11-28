@@ -8,7 +8,7 @@ from sequence import *
 import json
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10156 # Change each time you test
+PORT = 10163 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -69,7 +69,11 @@ def handleClient(client, serverChannel, cID, clientele):
                 command = msg.split("\n")
             tempMsg = command
             tempMsg = command[0].split(" ")
-            if(tempMsg[0] == "playerPlayed"):
+            if(tempMsg[0] == "gameOver"):
+                msg = "gameOver " + (msg.split(" ")[1]) + "\n"
+                for cID in clientele:
+                    clientele[cID].send(msg.encode())
+            elif(tempMsg[0] == "playerPlayed"):
                 fillPBoard(msg)
                 msg = "boardFilled " + str(pBoard) + "\n"
                 msg = msg.replace(", ",",")

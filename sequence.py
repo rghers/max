@@ -357,12 +357,13 @@ class PieceBoard(object):
     def winningBoard(self, row, col):
         if(row >= len(self.board)):
             return False
-        elif(self.board[row][col] == 0):
+        elif(self.board[row][col] == "0"):
             newRow, newCol = self.findNextRC(row, col)
             return self.winningBoard(newRow, newCol)
-        elif(self.diagConsecutive(row, col) or\
-           self.horizConsecutive(row, col) or\
-           self.vertConsecutive(row, col)):
+        elif(self.diag1Consecutive(row, col) or\
+             self.diag2Consecutive(row, col) or \
+             self.horizConsecutive(row, col) or\
+             self.vertConsecutive(row, col)):
             return True
         else:
             newRow, newCol = self.findNextRC(row, col)
@@ -377,13 +378,23 @@ class PieceBoard(object):
         return (0 <= row < len(self.board) and \
                 0 <= col < len(self.board[0]))
         
-    def diagConsecutive(self, row, col):
+    def diag1Consecutive(self, row, col):
         totalCons = 4
         for i in range(totalCons):
             if(not self.inBounds(row + i + 1, col + i + 1)):
                 return False
             elif(not self.board[row + i][col + i] == \
                self.board[row + i + 1][col + i + 1]):
+                return False
+        return True
+
+    def diag2Consecutive(self, row, col):
+        totalCons = 4
+        for i in range(totalCons):
+            if(not self.inBounds(row + i + 1, col - i - 1)):
+                return False
+            elif(not self.board[row + i][col - i] == \
+               self.board[row + i + 1][col - i - 1]):
                 return False
         return True
 
