@@ -266,16 +266,23 @@ class PlayerDeck(object):
                 return True
         return False
             
-    def removeCard(self, selectedCard):
+    def removeCard(self, selectedCard, amtEyes):
         for cardInd in range(len(self.playerCards)):
             if(self.playerCards[cardInd] == selectedCard):
                 self.playerCards.pop(cardInd)
                 return
-        for cardInd in range(len(self.playerCards)):
-            s = {Card(11, 0), Card(11, 1), Card(11, 2), Card(11, 3)}
-            if(self.playerCards[cardInd] in s):
-                self.playerCards.pop(cardInd)
-                return
+        if(amtEyes == "two"):
+            for cardInd in range(len(self.playerCards)):
+                s = {Card(11, 0), Card(11, 1)}
+                if(self.playerCards[cardInd] in s):
+                    self.playerCards.pop(cardInd)
+                    return
+        elif(amtEyes == "one"):
+            for cardInd in range(len(self.playerCards)):
+                s = {Card(11, 2), Card(11, 3)}
+                if(self.playerCards[cardInd] in s):
+                    self.playerCards.pop(cardInd)
+                    return
         
         
 class PieceBoard(object):
@@ -430,19 +437,24 @@ class PieceBoard(object):
 
 class Btn(object):
 
-    def __init__(self, imageFile, xPos, yPos, width, height):
-        self.imageFile = imageFile
+    def __init__(self, color, message, xPos, yPos, \
+                 width = Card.cardWidth * 2, height = Card.cardHeight * 2):
+        self.color = color
+        self.message = message
         self.width = width
         self.height = height
-        self.img = Image.open(self.imageFile)
-        self.img.resize((self.width, self.height))
-        self.picture = ImageTk.PhotoImage(self.img)
         self.xPos = xPos
         self.yPos = yPos
 
 
     def drawBtn(self, canvas):
-        canvas.create_image(self.xPos, self.yPos, image = self.picture)
+        canvas.create_rectangle(self.xPos - self.width // 2, \
+                                self.yPos - self.height // 2, \
+                                self.xPos + self.width // 2, \
+                                self.yPos + self.height // 2, \
+                                fill = self.color)
+        canvas.create_text(self.xPos, self.yPos, text = self.message, \
+                           font = "Arial 32 bold", fill = "white")
 
     def buttonClicked(self, xClicked, yClicked):
         leftBound = self.xPos - self.width // 2
@@ -463,7 +475,7 @@ class NewCardBtn(Btn):
         self.height = Card.cardHeight
         self.imageFile = "playing-card-gifs/x1.gif"
         self.img = Image.open(self.imageFile)
-        self.img = self.img.resize((self.width, self.height))
+        self.img = self.img.resize((self.width * 2, self.height * 2))
         self.picture = ImageTk.PhotoImage(self.img)
 
     def buttonAction(self, playerCards, d1, d2):
@@ -476,7 +488,8 @@ class NewCardBtn(Btn):
         tempHand.append(card)
         return tempHand
         
-
+    def drawBtn(self, canvas):
+        canvas.create_image(self.xPos, self.yPos, image = self.picture)
 
 
 

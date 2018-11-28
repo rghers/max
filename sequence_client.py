@@ -4,7 +4,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10129
+PORT = 10148
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -47,10 +47,11 @@ def init(data):
     data.receivedCard = False
     data.pBoard = PieceBoard()
     data.playerID = 0
+    data.margin = 200
     data.getCardBtn = NewCardBtn(data.width - 2 * Card.cardWidth, \
-                                 data.height // 2)
-    data.endTurnBtn = Btn("end.png", data.width - 25, \
-                                  data.height - 25, 50, 50)
+                                 data.height // 2 - data.margin // 2)
+    data.endTurnBtn = Btn("red", "End Turn", data.width - data.margin, \
+                                  data.height - data.margin)
     data.currPlayer = "1"
 
 
@@ -74,7 +75,8 @@ def mousePressed(event, data):
                (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
                 data.playerCards.hasTwoEyedJack())):
                 data.playedTurn = True
-                data.playerCards.removeCard(data.cardBoard.getCard(row, col))
+                data.playerCards.removeCard(data.cardBoard.getCard(row, col), \
+                                            "two")
                 data.pBoard.fillPosInPieceBoard(row, col, \
                                                 data.playerID)
                 msg = "playerPlayed " + str(data.pBoard)
@@ -85,7 +87,8 @@ def mousePressed(event, data):
                  data.playerID != data.pBoard.getPlayer(row, col)):
                 print("entered one eyed jack case")
                 data.playedTurn = True
-                data.playerCards.removeCard(data.cardBoard.getCard(row, col))
+                data.playerCards.removeCard(data.cardBoard.getCard(row, col), \
+                                            "one")
                 data.pBoard.fillPosInPieceBoard(row, col, "0")
                 msg = "playerPlayed " + str(data.pBoard)
                 print(msg)
@@ -131,6 +134,28 @@ def timerFired(data):
             print("failed")
             serverMsg.task_done()
 
+def displayPlayerTurn(canvas, data):
+    textX = data.width - data.margin
+    textY = data.margin // 2
+    if(data.currPlayer == "1" and data.playerID == "1"):
+        canvas.create_text(textX, textY, text = "Your Turn", \
+                           font = "Arial 32 bold", fill = "red")
+    elif(data.currPlayer == "2" and data.playerID == "2"):
+        canvas.create_text(textX, textY, text = "Your Turn", \
+                           font = "Arial 32 bold", fill = "blue")
+    elif(data.currPlayer == "3" and data.playerID == "3"):
+        canvas.create_text(textX, textY, text = "Your Turn", \
+                           font = "Arial 32 bold", fill = "green")
+    elif(data.currPlayer == "1"):
+        canvas.create_text(textX, textY, text = "Player 1's Turn", \
+                           font = "Arial 32 bold", fill = "red")
+    elif(data.currPlayer == "2"):
+        canvas.create_text(textX, textY, text = "Player 2's Turn", \
+                           font = "Arial 32 bold", fill = "blue")
+    else:
+        canvas.create_text(textX, textY, text = "Player 3's Turn", \
+                           font = "Arial 32 bold", fill = "green")
+
 def redrawAll(canvas, data):
     if(data.gameOver):
         canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
@@ -143,8 +168,8 @@ def redrawAll(canvas, data):
         ## END ## 
         data.playerCards.drawDeck(canvas)
         data.getCardBtn.drawBtn(canvas)
-        canvas.create_rectangle(data.width - 50, data.height - 50, \
-                                data.width, data.height)
+        displayPlayerTurn(canvas, data)
+        data.endTurnBtn.drawBtn(canvas)
         
 
 ####################################
