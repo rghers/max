@@ -1,11 +1,10 @@
-# oopy-playing-cards-demo.py
-# Demos class attributes, static methods, repr, eq, hash
 from tkinter import *
 from PIL import Image, ImageTk, ImageOps
 import random
 import json
 
-# Adapted from course notes of OOPy 
+# Adapted from course notes of OOPy: Playing Card Demo
+# https://www.cs.cmu.edu/~112/notes/notes-oop.html
 class Card(object):
     numberNames = [None, "Ace", "2", "3", "4", "5", "6", "7",
                    "8", "9", "10", "Jack", "Queen", "King"]
@@ -24,11 +23,15 @@ class Card(object):
         #         2 for Hearts, 3 for Spades
         self.number = number
         self.suit = suit
-        # http://zetcode.com/gui/tkinter/drawing/
+        # Card images acquired from CMU 15-112: Fundamentals of Programming and
+        # Computer Science Class Notes: Animation Demos / Images Demo
+        # https://www.cs.cmu.edu/~112/notes/notes-animations-demos.html
+
+        # Code structure for images learned from Image module on PIL documentation
+        # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html
         self.filename = "playing-card-gifs/%s%d.gif" % \
                         (Card.suitNames[self.suit][0].lower(),\
                          self.number)
-        
         self.img = Image.open(self.filename)
         self.img = self.img.resize((Card.cardWidth, Card.cardHeight))
         self.picture = ImageTk.PhotoImage(self.img)
@@ -49,12 +52,6 @@ class Card(object):
         return (isinstance(other, Card) and
                 (self.number == other.number) and
                 (self.suit == other.suit))
-
-    # Retrieved from images demo in Animation Demos course notes
-
-    def getSpecialPlayingCardImage(self, name):
-        specialNames = ["back", "joker1", "joker2"]
-        return getPlayingCardImage(data, specialNames.index(name)+1, "x")
 
     def drawPlayingCard(self, canvas, xPos, yPos):
         canvas.create_image(xPos, yPos, image = self.picture)
@@ -193,6 +190,15 @@ class CardBoard(object):
         newCard = card.convertColor(player)
         self.board[row][col] = newCard
 
+    def locateCard(self, card):
+        positions = []
+        for row in range(CardBoard.amtRows):
+            for col in range(CardBoard.amtCols):
+                cardRC = self.board[row][col]
+                if(cardRC == card):
+                    positions.append((row, col))
+        return positions
+
     def drawBoard(self, canvas):
         for row in range(CardBoard.amtRows):
             for col in range(CardBoard.amtCols):
@@ -224,6 +230,9 @@ class PlayerDeck(object):
         self.amtCards = 6
         self.playerCards = self.giveStaringCards(self.cardDeck1, \
                                                  self.cardDeck2)
+        self.startingX = 125
+        self.startingY = 775
+        self.xChange = 150
         
 
     def giveStaringCards(self, cardDeck1, cardDeck2):
@@ -239,12 +248,15 @@ class PlayerDeck(object):
     def getCards(self):
         return self.playerCards
 
+    def getCard(self, index):
+        return self.playerCards[index]
+
     def drawDeck(self, canvas):
-        x = 125
-        y = 775
+        x = self.startingX
+        y = self.startingY
         for card in self.playerCards:
             card.drawPlayingCard(canvas, x, y)
-            x += 150
+            x += self.xChange
     
     def hasCard(self, selectedCard):
         for card in self.playerCards:
@@ -267,11 +279,11 @@ class PlayerDeck(object):
         return False
             
     def removeCard(self, selectedCard, amtEyes):
-        for cardInd in range(len(self.playerCards)):
-            if(self.playerCards[cardInd] == selectedCard):
-                self.playerCards.pop(cardInd)
-                return
         if(amtEyes == "two"):
+            for cardInd in range(len(self.playerCards)):
+                if(self.playerCards[cardInd] == selectedCard):
+                    self.playerCards.pop(cardInd)
+                    return
             for cardInd in range(len(self.playerCards)):
                 s = {Card(11, 0), Card(11, 1)}
                 if(self.playerCards[cardInd] in s):
@@ -283,7 +295,26 @@ class PlayerDeck(object):
                 if(self.playerCards[cardInd] in s):
                     self.playerCards.pop(cardInd)
                     return
-        
+
+    def clickedHandCard(self, xCoord, yCoord):
+        for cardInd in range(len(self.playerCards)):
+            xPos = self.startingX + self.xChange * cardInd
+            yPos = self.startingY
+            if(xPos - Card.cardWidth // 2 <= xCoord <= xPos + Card.cardWidth and\
+               yPos - Card.cardHeight // 2 <= yCoord <= yPos + Card.cardHeight):
+                print(cardInd)
+                return cardInd
+        return -1
+
+    def removeClickedHandCard(self, card):
+        for cardInd in range(len(self.playerCards)):
+            if(self.playerCards[cardInd] == card):
+                self.playerCards.pop(cardInd)
+                return
+    
+
+    
+            
         
 class PieceBoard(object):
     amtRows = 10
@@ -471,11 +502,13 @@ class NewCardBtn(Btn):
     def __init__(self, xPos, yPos):
         self.xPos = xPos
         self.yPos = yPos
-        self.width = Card.cardWidth
-        self.height = Card.cardHeight
+        self.width = Card.cardWidth * 2
+        self.height = Card.cardHeight * 2
+        # Code struecute for images learned from Image module on PIL documentation
+        # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html
         self.imageFile = "playing-card-gifs/x1.gif"
         self.img = Image.open(self.imageFile)
-        self.img = self.img.resize((self.width * 2, self.height * 2))
+        self.img = self.img.resize((self.width, self.height))
         self.picture = ImageTk.PhotoImage(self.img)
 
     def buttonAction(self, playerCards, d1, d2):

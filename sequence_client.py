@@ -1,10 +1,13 @@
+# Barebone client code acquired from
+# https://kdchin.gitbooks.io/sockets-module-manual/
+
 import socket
 import threading
 from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10148
+PORT = 10156
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -25,8 +28,7 @@ def handleServerMsg(server, serverMsg):
             serverMsg.put(readyMsg)
             command = msg.split("\n")
 
-# events-example0.py from 15-112 website
-# Barebones timer, mouse, and keyboard events
+
 
 from tkinter import *
 from sequence import *
@@ -34,6 +36,10 @@ import random
 ####################################
 # customize these functions
 ####################################
+
+# Code acquired from CMU 15-112: Fundamentals of Programming and Computer
+# Science Class Notes: Animation Part 2: Time-Based Animations in Tkinter
+# https://www.cs.cmu.edu/~112/notes/notes-animations-part2.html
 
 def init(data):
     data.d1 = Deck()
@@ -60,7 +66,28 @@ def mousePressed(event, data):
     msg = ""
     row, col = data.pBoard.convertCoordToPos(event.x, event.y)
     if(data.playerID == data.currPlayer):
-        if(not data.playedTurn):
+        if(data.playerCards.clickedHandCard(event.x, event.y) > 0):
+            # get the card
+            cardInd = data.playerCards.clickedHandCard(event.x, event.y)
+            card = data.playerCards.getCard(cardInd)
+            # Find location of card in CardBoard
+            positions = data.cardBoard.locateCard(card)
+            print(positions)
+            loc1 = positions[0]
+            loc1R = loc1[0]
+            loc1C = loc1[1]
+            loc2 = positions[1]
+            loc2R = loc2[0]
+            loc2C = loc2[1]
+            # Check if positions in piece board are filled
+            if(len(positions) != 0 and \
+               data.pBoard.getPlayer(loc1R, loc1C) != "0" and\
+               data.pBoard.getPlayer(loc2R, loc2C) != "0"):
+                # Remove Card from hand
+                data.playerCards.removeClickedHandCard(card)
+                # Give player a new card
+                data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
+        elif(not data.playedTurn):
             if(data.pBoard.onPieceBoard(row, col) and\
                data.pBoard.isValidPos(row, col) and\
                data.pBoard.isCornerPiece(row, col)):
@@ -122,6 +149,11 @@ def timerFired(data):
                 newPID = msg[1]
                 data.otherPlayers[newPID] = PlayerDeck(data.d1, data.d2)
             elif(command == "playerPlayed"):
+                # I think here i need to get a message from the server
+                # saying gameEnded, and rather check after a playerPlayed
+                # in mouse clicked if the game is over. If it's over then send
+                # a modified message to server so that it can process message
+                # and send out to all servers. Then here change gameOver to true
                 if(data.pBoard.winningBoard(0, 0)):
                     data.gameOver = True
             elif(command == "boardFilled"):
@@ -176,6 +208,11 @@ def redrawAll(canvas, data):
 # use the run function as-is
 ####################################
 
+# Run function acquired from CMU 15-112: Fundamentals of Programming and
+# Computer Science Class Notes: Animation Part 2: Time-Based Animations in
+# Tkinter
+# https://www.cs.cmu.edu/~112/notes/notes-animations-part2.html
+
 def run(width, height, serverMsg=None, server=None):
     def redrawAllWrapper(canvas, data):
         canvas.delete(ALL)
@@ -197,6 +234,7 @@ def run(width, height, serverMsg=None, server=None):
         redrawAllWrapper(canvas, data)
         # pause, then call timerFired again
         canvas.after(data.timerDelay, timerFiredWrapper, canvas, data)
+    # Set up data and call init
     class Struct(object): pass
     data = Struct()
     data.server = server
@@ -219,7 +257,7 @@ def run(width, height, serverMsg=None, server=None):
     root.mainloop()  # blocks until window is closed
     print("bye!")
         
-    # Set up data and call init
+    
 ##    class Struct(object): pass
 ##    data = Struct()
 ##    data.server = server
