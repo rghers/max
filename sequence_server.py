@@ -1,14 +1,14 @@
 # Barebones server code acquired from
 # https://kdchin.gitbooks.io/sockets-module-manual/
-
 import socket
 import threading
 from queue import Queue
 from sequence import *
 import json
+import sys
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10163 # Change each time you test
+PORT = 10171 # Change each time you test
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -84,6 +84,10 @@ def handleClient(client, serverChannel, cID, clientele):
                 msg = "nextPlayer " + nextPlayer + "\n"
                 for cID in clientele:
                     clientele[cID].send(msg.encode())
+            elif(tempMsg[0] == "playerReady"):
+                msg = "playerReady " + msg.split(" ")[1] + "\n"
+                for cID in clientele:
+                    clientele[cID].send(msg.encode())
         except:
             # we failed
             print("client handle of server failed")
@@ -132,3 +136,9 @@ while True:
     threading.Thread(target = handleClient, args = 
                         (client ,serverChannel, myID, clientele)).start()
     playerNum += 1
+
+
+def main():
+    print("In server")
+    for arg in sys.argv[1:]:
+        print("python server argument " + str(arg))

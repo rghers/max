@@ -7,7 +7,7 @@ from queue import Queue
 import json
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10163
+PORT = 10171
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -60,6 +60,12 @@ def init(data):
                                   data.height - data.margin)
     data.currPlayer = "1"
     data.winner = "0"
+    data.startGameScreen = True
+    data.startGameBtn = Btn("blue", "Start Game", data.width // 2, \
+                            data.margin * 2)
+    data.rulesBtn = Btn("blue", "Rules", data.width // 2, \
+                            data.margin * 3)
+    data.readyPlayers = [False, False, False]
 
 
 def playerClickedHandCardEvent(data, xCoord, yCoord):
@@ -101,14 +107,17 @@ def playerRemovedPiece(data, row, col):
 
 def mousePressed(event, data):
     msg = ""
-    row, col = data.pBoard.convertCoordToPos(event.x, event.y)
+    if(data.startGameBtn.buttonClicked(event.x, event.y)):
+        msg = "playerReady " + data.playerID
+        print(data.playerID + "clicked start game")
     # Checks if this player is current player
-    if(data.playerID == data.currPlayer):
+    elif(data.playerID == data.currPlayer):
+        row, col = data.pBoard.convertCoordToPos(event.x, event.y)
         # Checks if a player clicked a card in their deck (attempting)
         # to replace a card with no available positions.
         if(data.playerCards.clickedHandCard(event.x, event.y) > 0):
             playerClickedHandCardEvent(data, event.x, event.y)
-        # Checks if the player has not played thier turn yet
+        # Checks if the player has not played their turn yet
         elif(not data.playedTurn):
             # Checks if a player played a piece in a corner position
             if(data.pBoard.onPieceBoard(row, col) and\
@@ -148,10 +157,8 @@ def mousePressed(event, data):
             data.receivedCard = False
             msg = "playerEnded " +  data.playerID 
             print(msg)
-        if(msg != ""):
-            data.server.send(msg.encode())
-    else:
-        print("Not your turn")
+    if(msg != ""):
+        data.server.send(msg.encode())
 
 def keyPressed(event, data):
     pass
@@ -183,6 +190,12 @@ def timerFired(data):
             elif(command == "nextPlayer"):
                 # Transfers move to next player
                 data.currPlayer = msg[1]
+            elif(command == "playerReady"):
+                print("entered")
+                data.readyPlayers[int(msg[1]) - 1] = True
+                print(data.readyPlayers)
+                if(False not in data.readyPlayers):
+                    data.startGameScreen = False
         except:
             print("failed")
             serverMsg.task_done()
@@ -226,12 +239,23 @@ def drawWinnerScreen(canvas, data):
                            text = "You Lost. Player " + data.winner + " won", \
                            font = "Arial 32 bold", fill = "white")
 
+def drawStartScreen(canvas, data):
+    canvas.create_rectangle(0, 0, data.width, data.height, outline = "blue", \
+                           width = 20)
+    canvas.create_text(data.width // 2, data.margin, text = "Sequence", \
+                       font = "Times 128", fill = "blue")
+    data.startGameBtn.drawBtn(canvas)
+    data.rulesBtn.drawBtn(canvas)
+    
 def redrawAll(canvas, data):
-    if(data.gameOver):
+    if(data.startGameScreen):
+        drawStartScreen(canvas, data)
+    elif(data.gameOver):
         drawWinnerScreen(canvas, data)
        #canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
     
     else:
+        canvas.create_rectangle(0, 0, data.width, data.height, fill = "#1c263d")
         #canvas.create_image(0, 0, anchor = NW, \
         #                    image = data.pokerTableImg)
         data.cardBoard.drawBoard(canvas)
