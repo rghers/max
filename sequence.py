@@ -184,11 +184,11 @@ class CardBoard(object):
 
     ## IDEA FOR CHANGING CARDS COLOR OPACITY AFTER A VALID CLICK THEN REDRAWING
     ## IN REDRAWALL AND KEEPING DRAWBOARD SAME. 
-    def modifyCardColor(self, row, col, player):
-        card = self.board[row][col]
-        ## Card Convertion Section ## 
-        newCard = card.convertColor(player)
-        self.board[row][col] = newCard
+##    def modifyCardColor(self, row, col, player):
+##        card = self.board[row][col]
+##        ## Card Convertion Section ## 
+##        newCard = card.convertColor(player)
+##        self.board[row][col] = newCard
 
     def locateCard(self, card):
         positions = []

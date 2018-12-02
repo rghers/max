@@ -1,3 +1,13 @@
+
+# ADD REPLAYABILITY
+# ADD SOUNDS MAYBE
+# ADD RULES PAGE
+# ADD AI
+
+
+
+
+
 # Barebone client code acquired from
 # https://kdchin.gitbooks.io/sockets-module-manual/
 
@@ -8,6 +18,7 @@ import json
 from tkinter import *
 from sequence import *
 import random
+from sequence_AI import * 
 
 HOST = "" # put your IP address here if playing on multiple computers
 portFile = open("port_number.txt")
@@ -64,8 +75,10 @@ def init(data):
     data.currPlayer = "1"
     data.winner = "0"
     data.startGameScreen = True
-    data.startGameBtn = Btn("blue", "Start Game", data.width // 2, \
+    data.singlePlayerBtn = Btn("blue", "Single Player", data.margin * 2, \
                             data.margin * 2)
+    data.multiPlayerBtn = Btn("blue", "MultiPlayer", data.width - \
+                              data.margin * 2, data.margin * 2)
     data.rulesBtn = Btn("blue", "Rules", data.width // 2, \
                             data.margin * 3)
     data.readyPlayers = [False, False, False]
@@ -77,7 +90,6 @@ def playerClickedHandCardEvent(data, xCoord, yCoord):
     card = data.playerCards.getCard(cardInd)
     # Find location of card in CardBoard
     positions = data.cardBoard.locateCard(card)
-    print(positions)
     loc1 = positions[0]
     loc1R = loc1[0]
     loc1C = loc1[1]
@@ -110,7 +122,9 @@ def playerRemovedPiece(data, row, col):
 
 def mousePressed(event, data):
     msg = ""
-    if(data.startGameBtn.buttonClicked(event.x, event.y)):
+    if(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
+        runTempGame(data.playerID)
+    elif(data.multiPlayerBtn.buttonClicked(event.x, event.y)):
         msg = "playerReady " + data.playerID
         print(data.playerID + "clicked start game")
     # Checks if this player is current player
@@ -247,12 +261,18 @@ def drawStartScreen(canvas, data):
                            width = 20)
     canvas.create_text(data.width // 2, data.margin, text = "Sequence", \
                        font = "Times 128", fill = "blue")
-    data.startGameBtn.drawBtn(canvas)
+    data.singlePlayerBtn.drawBtn(canvas)
+    data.multiPlayerBtn.drawBtn(canvas)
     data.rulesBtn.drawBtn(canvas)
     
 def redrawAll(canvas, data):
     if(data.startGameScreen):
         drawStartScreen(canvas, data)
+        if(data.readyPlayers[int(data.playerID) - 1]):
+            canvas.create_text(data.width - data.margin * 1.5, \
+                               data.height - 50,\
+                               text = "Waiting for players...", \
+                               font = "Times 64")
     elif(data.gameOver):
         drawWinnerScreen(canvas, data)
        #canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
