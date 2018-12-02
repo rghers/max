@@ -6,9 +6,21 @@ from queue import Queue
 from sequence import *
 import json
 import sys
+from port_changer import *
+#from run_sequence import *
+
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
-PORT = 10171 # Change each time you test
+portFile = open("port_number.txt")
+lines = portFile.readlines()
+initialPort = int(lines[0])
+portFile.close()
+
+p = Port(initialPort)
+p.getNewPortNum()
+p.copyToFile("port_number.txt")
+PORT = p.getPortNum() # Change each time you test
+print(PORT)
 BACKLOG = 3 # number of people
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -137,8 +149,12 @@ while True:
                         (client ,serverChannel, myID, clientele)).start()
     playerNum += 1
 
+##
+##def main():
+##    print("In server")
+##    for arg in sys.argv[1:]:
+##        print("python server argument " + str(arg))
+##
+##if __name__ == "__main__":
+##    main()
 
-def main():
-    print("In server")
-    for arg in sys.argv[1:]:
-        print("python server argument " + str(arg))

@@ -179,8 +179,8 @@ class CardBoard(object):
                 if(self.board[row][col] == (-1, -1)):
                     self.board[row][col] = Card()
                 else:
-                    self.board[row][col] = Card(self.board[row][col][0],\
-                                            self.board[row][col][1])
+                    self.board[row][col] = Card(self.board[row][col][0], \
+                                                self.board[row][col][1])
 
     ## IDEA FOR CHANGING CARDS COLOR OPACITY AFTER A VALID CLICK THEN REDRAWING
     ## IN REDRAWALL AND KEEPING DRAWBOARD SAME. 

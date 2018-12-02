@@ -5,9 +5,15 @@ import socket
 import threading
 from queue import Queue
 import json
+from tkinter import *
+from sequence import *
+import random
 
 HOST = "" # put your IP address here if playing on multiple computers
-PORT = 10171
+portFile = open("port_number.txt")
+lines = portFile.readlines()
+PORT = int(lines[0])
+portFile.close()
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -30,9 +36,6 @@ def handleServerMsg(server, serverMsg):
 
 
 
-from tkinter import *
-from sequence import *
-import random
 ####################################
 # customize these functions
 ####################################
