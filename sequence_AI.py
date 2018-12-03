@@ -327,6 +327,7 @@ def makeTurn(data):
     
 def timerFired(data):
     if(data.computerTurn):
+        print("it is the computer turn")
         time.sleep(3)
         makeTurn(data)
         if(data.pBoard.winningBoard(0, 0)):
@@ -344,19 +345,25 @@ def drawWinnerScreen(canvas, data):
                            text = "Player Won!", font = "Times 64")
         
 def redrawAll(canvas, data):
+    print("in redraw all of AI")
     if(data.gameOver):
         drawWinnerScreen(canvas, data)
        #canvas.create_rectangle(0, 0, data.width, data.height, fill = "red")
     
     else:
+        print("in else of redraw all of AI")
         canvas.create_rectangle(0, 0, data.width, data.height, fill = "#1c263d")
         #canvas.create_image(0, 0, anchor = NW, \
         #                    image = data.pokerTableImg)
+        print("before draw board in AI")
         data.cardBoard.drawBoard(canvas)
+        print("after draw board in AI")
         ## Temp State ##
         data.pBoard.drawPieces(canvas)
+        print("after draw pieces in AI")
         ## END ## 
         data.playerCards.drawDeck(canvas)
+        print("after draw deck in AI")
         data.getCardBtn.drawBtn(canvas)
         data.endTurnBtn.drawBtn(canvas)
         

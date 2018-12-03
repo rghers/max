@@ -197,6 +197,7 @@ class CardBoard(object):
                         print("this is suit: ",suit)                 
                         myCard = Card(rank, suit)
                         self.board[row][col] = myCard
+        print("done with filing the board")
                        
 
     ## IDEA FOR CHANGING CARDS COLOR OPACITY AFTER A VALID CLICK THEN REDRAWING
