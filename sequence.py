@@ -32,6 +32,7 @@ class Card(object):
         self.filename = "playing-card-gifs/%s%d.gif" % \
                         (Card.suitNames[self.suit][0].lower(),\
                          self.number)
+        print("the file name is: ",self.filename)
         self.img = Image.open(self.filename)
         self.img = self.img.resize((Card.cardWidth, Card.cardHeight))
         self.picture = ImageTk.PhotoImage(self.img)
@@ -48,6 +49,14 @@ class Card(object):
     def __hash__(self):
         return hash(self.getHashables())
 
+    def getNumber(self):
+        print("getting number.....:",self[0])
+        return self[0]
+
+    def getSuit(self):
+        print("getting suit.....:",self[1])
+        return self[1]
+    
     def __eq__(self, other):
         return (isinstance(other, Card) and
                 (self.number == other.number) and
@@ -176,11 +185,19 @@ class CardBoard(object):
     def cardFillBoard(self):
         for row in range(len(self.board)):
             for col in range(len(self.board[0])):
-                if(self.board[row][col] == (-1, -1)):
-                    self.board[row][col] = Card()
-                else:
-                    self.board[row][col] = Card(self.board[row][col][0], \
-                                                self.board[row][col][1])
+                if (isinstance(self.board[row][col], tuple)):
+                    if(self.board[row][col] == (-1, -1)):
+                        self.board[row][col] = Card()
+                    else:
+                        c = self.getCard(row,col)
+                        print("this is c: ",c)
+                        rank= Card.getNumber(c)
+                        print("this is rank: ",rank)
+                        suit= Card.getSuit(c)
+                        print("this is suit: ",suit)                 
+                        myCard = Card(rank, suit)
+                        self.board[row][col] = myCard
+                       
 
     ## IDEA FOR CHANGING CARDS COLOR OPACITY AFTER A VALID CLICK THEN REDRAWING
     ## IN REDRAWALL AND KEEPING DRAWBOARD SAME. 

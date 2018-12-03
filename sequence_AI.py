@@ -409,5 +409,5 @@ def runTempGame(playerID, width=1400, height=810):
     # and launch the app
     root.mainloop()  # blocks until window is closed
     print("bye!")
-runTempGame("1")
+#runTempGame("1")
 

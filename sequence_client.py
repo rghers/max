@@ -122,60 +122,66 @@ def playerRemovedPiece(data, row, col):
 
 def mousePressed(event, data):
     msg = ""
-    if(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
-        runTempGame(data.playerID)
-    elif(data.multiPlayerBtn.buttonClicked(event.x, event.y)):
-        msg = "playerReady " + data.playerID
-        print(data.playerID + "clicked start game")
-    # Checks if this player is current player
-    elif(data.playerID == data.currPlayer):
-        row, col = data.pBoard.convertCoordToPos(event.x, event.y)
-        # Checks if a player clicked a card in their deck (attempting)
-        # to replace a card with no available positions.
-        if(data.playerCards.clickedHandCard(event.x, event.y) > 0):
-            playerClickedHandCardEvent(data, event.x, event.y)
-        # Checks if the player has not played their turn yet
-        elif(not data.playedTurn):
-            # Checks if a player played a piece in a corner position
-            if(data.pBoard.onPieceBoard(row, col) and\
-               data.pBoard.isValidPos(row, col) and\
-               data.pBoard.isCornerPiece(row, col)):
-                playerPlayedCornerPiece(data, row, col)
-                msg = "playerPlayed " + str(data.pBoard)
-                if(data.pBoard.winningBoard(0, 0)):
-                    msg = "gameOver " + data.playerID
+    if(data.startGameScreen):
+        if(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
+            data.playerID="1"
+            runTempGame(data.playerID)
+        elif(data.multiPlayerBtn.buttonClicked(event.x, event.y)):
+            data.playerID=str(data.playerID)  
+            msg = "playerReady " + data.playerID
+            print(data.playerID + "clicked start game")
+        data.startGameScreen= False
+    else:
+        # Checks if this player is current player
+        if(data.playerID != '0' and\
+             data.playerID == data.currPlayer):
+            row, col = data.pBoard.convertCoordToPos(event.x, event.y)
+            # Checks if a player clicked a card in their deck (attempting)
+            # to replace a card with no available positions.
+            if(data.playerCards.clickedHandCard(event.x, event.y) > 0):
+                playerClickedHandCardEvent(data, event.x, event.y)
+            # Checks if the player has not played their turn yet
+            elif(not data.playedTurn):
+                # Checks if a player played a piece in a corner position
+                if(data.pBoard.onPieceBoard(row, col) and\
+                   data.pBoard.isValidPos(row, col) and\
+                   data.pBoard.isCornerPiece(row, col)):
+                    playerPlayedCornerPiece(data, row, col)
+                    msg = "playerPlayed " + str(data.pBoard)
+                    if(data.pBoard.winningBoard(0, 0)):
+                        msg = "gameOver " + data.playerID
+                    print(msg)
+                # Checks if a player played a piece in a non-corner position
+                elif(data.pBoard.onPieceBoard(row, col) and\
+                   data.pBoard.isValidPos(row, col) and\
+                   (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
+                    data.playerCards.hasTwoEyedJack())):
+                    playerPlayedPiece(data, row, col)
+                    msg = "playerPlayed " + str(data.pBoard)
+                    if(data.pBoard.winningBoard(0, 0)):
+                        msg = "gameOver " + data.playerID
+                    print(msg)
+                # Checks if a player tried to remove someone else's piece
+                elif(data.pBoard.onPieceBoard(row, col) and\
+                     not data.pBoard.isValidPos(row, col) and\
+                     data.playerCards.hasOneEyedJack() and\
+                     data.playerID != data.pBoard.getPlayer(row, col)):
+                    playerRemovedPiece(data, row, col)
+                    msg = "playerPlayed " + str(data.pBoard)
+                    print(msg)
+            # Checks if a player wants to get a new card after playing a turn
+            elif(data.getCardBtn.buttonClicked(event.x, event.y) and \
+                 not data.receivedCard):
+                data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
+                data.receivedCard = True
+            # Checks if a player wants to end their turn
+            elif(data.endTurnBtn.buttonClicked(event.x, event.y)):
+                data.playedTurn = False
+                data.receivedCard = False
+                msg = "playerEnded " +  data.playerID 
                 print(msg)
-            # Checks if a player played a piece in a non-corner position
-            elif(data.pBoard.onPieceBoard(row, col) and\
-               data.pBoard.isValidPos(row, col) and\
-               (data.playerCards.hasCard(data.cardBoard.getCard(row, col)) or\
-                data.playerCards.hasTwoEyedJack())):
-                playerPlayedPiece(data, row, col)
-                msg = "playerPlayed " + str(data.pBoard)
-                if(data.pBoard.winningBoard(0, 0)):
-                    msg = "gameOver " + data.playerID
-                print(msg)
-            # Checks if a player tried to remove someone else's piece
-            elif(data.pBoard.onPieceBoard(row, col) and\
-                 not data.pBoard.isValidPos(row, col) and\
-                 data.playerCards.hasOneEyedJack() and\
-                 data.playerID != data.pBoard.getPlayer(row, col)):
-                playerRemovedPiece(data, row, col)
-                msg = "playerPlayed " + str(data.pBoard)
-                print(msg)
-        # Checks if a player wants to get a new card after playing a turn
-        elif(data.getCardBtn.buttonClicked(event.x, event.y) and \
-             not data.receivedCard):
-            data.getCardBtn.buttonAction(data.playerCards, data.d1, data.d2)
-            data.receivedCard = True
-        # Checks if a player wants to end their turn
-        elif(data.endTurnBtn.buttonClicked(event.x, event.y)):
-            data.playedTurn = False
-            data.receivedCard = False
-            msg = "playerEnded " +  data.playerID 
-            print(msg)
-    if(msg != ""):
-        data.server.send(msg.encode())
+        if(msg != ""):
+            data.server.send(msg.encode())
 
 def keyPressed(event, data):
     pass
