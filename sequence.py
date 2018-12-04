@@ -5,6 +5,7 @@ import json
 
 # Adapted from course notes of OOPy: Playing Card Demo
 # https://www.cs.cmu.edu/~112/notes/notes-oop.html
+# Card class
 class Card(object):
     numberNames = [None, "Ace", "2", "3", "4", "5", "6", "7",
                    "8", "9", "10", "Jack", "Queen", "King"]
@@ -15,7 +16,8 @@ class Card(object):
     SPADES = 3
     cardHeight = 71
     cardWidth = 96
-    
+
+    # Card properties
     def __init__(self, number = 2, suit = 4):
         # number is 1 for Ace, 2...10,
         #           11 for Jack, 12 for Queen, 13 for King
@@ -32,95 +34,52 @@ class Card(object):
         self.filename = "playing-card-gifs/%s%d.gif" % \
                         (Card.suitNames[self.suit][0].lower(),\
                          self.number)
-        print("the file name is: ",self.filename)
+        #print("the file name is: ",self.filename)
         self.img = Image.open(self.filename)
         self.img = self.img.resize((Card.cardWidth, Card.cardHeight))
         self.picture = ImageTk.PhotoImage(self.img)
         
-
+    # String representation of Card
     def __repr__(self):
         return ("<%s of %s>" %
                 (Card.numberNames[self.number],
                  Card.suitNames[self.suit]))
-
+    
     def getHashables(self):
         return (self.number, self.suit) # return a tuple of hashables
 
+    # Turns cards properties into a hashable item
     def __hash__(self):
         return hash(self.getHashables())
 
+    # Getter for card number
     def getNumber(self):
-        print("getting number.....:",self[0])
         return self[0]
 
+    # Getter for suit value
     def getSuit(self):
-        print("getting suit.....:",self[1])
         return self[1]
-    
+
+    # Compares cards based on suit and value
     def __eq__(self, other):
         return (isinstance(other, Card) and
                 (self.number == other.number) and
                 (self.suit == other.suit))
-
-    def drawPlayingCard(self, canvas, xPos, yPos):
-        canvas.create_image(xPos, yPos, image = self.picture)
-
-##    def givePiece(self, player):
-##        currentImage = self.img
-##        newImage = self.convertColor(player)
-##        self.picture = ImageTk.PhotoImage(newImage)
-
-##    def convertColor(self, player):
-##        if(player == 0):
-##            return self.img
-##        tempImage = self.img
-##        for i in range(self.cardWidth):
-##            for j in range(self.cardHeight):
-##                pixel = tempImage.getpixel((i, j))
-##                if(i == 0 and j == 0):
-##                    print(pixel)
-##               # if(pixel == (256, 256, 256)):
-##                    #print("found white pixel")
-##                if(player == 1):
-##                    tempImage.putpixel((i, j), (125, 0, 0))
-##                elif(player == 2):
-##                    tempImage.putpixel((i, j), (0, 125, 0))
-##                elif(player == 3):
-##                    tempImage.putpixel((i, j), (0, 0, 125))
-##        return tempImage'
-##
-##    def convertColor(self):
-##        imgRGBA = self.img.convert("RGBA")
-##        imgAlpha = imgComb.putalpha(125)
-##        self.img = imgComb
-
     
+    # Draws playing card 
+    def drawPlayingCard(self, canvas, xPos, yPos):
+        pic = self.picture
+        canvas.create_image(xPos, yPos, image = pic)
 
-    #def convertColor(self, player, white = "#000099", black = "#99CCFF"):
-        #temp = self.img
-        #tempImage = ImageOps.colorize(ImageOps.grayscale(self.img), black, white)
-        #newImage = tempImage.convert('P', palette=Image.ADAPTIVE, colors=256)
-        #return newImage
-                
-
-##    def manipulatePixels(self, rgbTup):
-##        pixels = self.load()
-##        for i in range(self.size[0]):
-##            for j in range(self.size[1]):
-##                rPixel, bPixel, gPixel = pixels[i, j]
-##                newRGB = (rPixel + rgbTup[0], bPixel + rgbTup[1], \
-##                          gPixel + rgbTup[2])
-##                pixels[i, j] = newRGB
-##        
-
-        
+# Deck class        
 class Deck(object):
 
+    # Deck properties
     def __init__(self):
         self.deck = self.createDeck()
         self.usedCards = set()
-        
 
+    # Creates a deck containing all non-special(jokers and back) cards
     def createDeck(self):
         cards = []
         for rank in range(len(Card.numberNames)):
@@ -130,13 +89,8 @@ class Deck(object):
                     cards.append(card)
         return cards
 
-##    def cardFillDeck(self):
-##        for cardInd in range(len(self.deck)):
-##            currCard = self.deck[cardInd]
-##            rank = currCard[0]
-##            suit = currCard[1]
-##            self.deck[cardInd] = Card(rank, suit)
-##    
+    # Gets a random card from this deck and ensures that card has not already
+    # been picked
     def getRandomCard(self):
         randCardIndex = random.randint(0, 51)
         while(self.deck[randCardIndex] in self.usedCards):
@@ -144,17 +98,20 @@ class Deck(object):
         self.usedCards.add(self.deck[randCardIndex])
         return self.deck[randCardIndex]
 
+    # Shuffles the deck
     def shuffleDeck(self):
         random.shuffle(self.deck)
 
+    # String representation of Deck
     def __repr__(self):
         return "Deck is: \n" + str(self.deck)
 
     
-
+# Card Board Class
 class CardBoard(object):
     amtRows = 10
     amtCols = 10
+    # Matrix of tuples containing (value, suit) of cards
     board = [[(-1, -1), (10, 3), (12, 3), (13, 3), (1, 3), \
               (2, 1), (3, 1), (4, 1), (5, 1), (-1, -1)],
              [(9, 3), (10, 2), (9, 2), (8, 2), (7, 2), \
@@ -178,10 +135,12 @@ class CardBoard(object):
     seperationX = 70
     seperationY = 40
 
+    # CardBoard properties 
     def __init__(self):
         self.board = CardBoard.board
         
-
+    # Repopulates the board position with respective cards by accessing tuple
+    # values
     def cardFillBoard(self):
         for row in range(len(self.board)):
             for col in range(len(self.board[0])):
@@ -190,24 +149,12 @@ class CardBoard(object):
                         self.board[row][col] = Card()
                     else:
                         c = self.getCard(row,col)
-                        print("this is c: ",c)
                         rank= Card.getNumber(c)
-                        print("this is rank: ",rank)
-                        suit= Card.getSuit(c)
-                        print("this is suit: ",suit)                 
+                        suit= Card.getSuit(c)                
                         myCard = Card(rank, suit)
                         self.board[row][col] = myCard
-        print("done with filing the board")
-                       
-
-    ## IDEA FOR CHANGING CARDS COLOR OPACITY AFTER A VALID CLICK THEN REDRAWING
-    ## IN REDRAWALL AND KEEPING DRAWBOARD SAME. 
-##    def modifyCardColor(self, row, col, player):
-##        card = self.board[row][col]
-##        ## Card Convertion Section ## 
-##        newCard = card.convertColor(player)
-##        self.board[row][col] = newCard
-
+        
+    # Finds the two row and column postions for passed card
     def locateCard(self, card):
         positions = []
         for row in range(CardBoard.amtRows):
@@ -217,42 +164,40 @@ class CardBoard(object):
                     positions.append((row, col))
         return positions
 
+    # Draws the card board
     def drawBoard(self, canvas):
         for row in range(CardBoard.amtRows):
             for col in range(CardBoard.amtCols):
-                card = self.board[row][col]
+                card = self.getCard(row, col)
                 card.drawPlayingCard(canvas, CardBoard.seperationX + \
                                      Card.cardWidth * col, \
                                      CardBoard.seperationY + \
                                      Card.cardHeight * row)
+
+    # Prints the card board
+    def printBoard(self):
+        print(self.board)
                 
-
-##    @staticmethod
-##    def getBoardDimensions(self):
-##        return(CardBoard.amtRows*Card.cardHeight, \
-##               CardBoard.amtCols*Card.cardWidth)
-
-
-
-        
-            
-
+    # Returns the card at a given row and column
     def getCard(self, row, col):
         return self.board[row][col]
 
+# Player Deck Class
 class PlayerDeck(object):
 
+    # PlayerDeck properties
     def __init__(self, cardDeck1, cardDeck2):
         self.cardDeck1 = cardDeck1
         self.cardDeck2 = cardDeck2
         self.amtCards = 6
         self.playerCards = self.giveStaringCards(self.cardDeck1, \
                                                  self.cardDeck2)
+        # Starting positions on Tkinter for the deck drawing 
         self.startingX = 125
         self.startingY = 775
         self.xChange = 150
         
-
+    # Gives a player the initial 6 starting cards
     def giveStaringCards(self, cardDeck1, cardDeck2):
         tempHand = []
         for i in range(self.amtCards):
@@ -262,40 +207,47 @@ class PlayerDeck(object):
                 card = self.cardDeck2.getRandomCard()
             tempHand.append(card)
         return tempHand
-    
+
+    # Returns the cards in the players hand
     def getCards(self):
         return self.playerCards
 
+    # Gets a specific card within the players hand
     def getCard(self, index):
         return self.playerCards[index]
 
+    # Draws the players hand
     def drawDeck(self, canvas):
         x = self.startingX
         y = self.startingY
         for card in self.playerCards:
             card.drawPlayingCard(canvas, x, y)
             x += self.xChange
-    
+            
+    # Checks if a player has a given card in their hand
     def hasCard(self, selectedCard):
         for card in self.playerCards:
             if(card == selectedCard):
                 return True
         return False
 
+    # Checks if the player has a two eyed jack (special card)
     def hasTwoEyedJack(self):
         s = {Card(11, 0), Card(11, 1)}
         for card in self.playerCards:
             if(card in s):
                 return True
         return False
-
+    
+    # Checks if the player has a one eyed jack (special card)
     def hasOneEyedJack(self):
         s = {Card(11, 2), Card(11, 3)}
         for card in self.playerCards:
             if(card in s):
                 return True
         return False
-            
+
+    # Removes a passed card from the players hand
     def removeCard(self, selectedCard, amtEyes):
         if(amtEyes == "two"):
             for cardInd in range(len(self.playerCards)):
@@ -314,44 +266,41 @@ class PlayerDeck(object):
                     self.playerCards.pop(cardInd)
                     return
 
+    # Checks if the player clicked on of their cards on Tkinter window
+    # and converts coordinate click to an index position within player hand
     def clickedHandCard(self, xCoord, yCoord):
         for cardInd in range(len(self.playerCards)):
             xPos = self.startingX + self.xChange * cardInd
             yPos = self.startingY
-            if(xPos - Card.cardWidth // 2 <= xCoord <= xPos + Card.cardWidth and\
-               yPos - Card.cardHeight // 2 <= yCoord <= yPos + Card.cardHeight):
-                print(cardInd)
+            if(xPos - Card.cardWidth // 2 <= xCoord <= xPos + \
+               Card.cardWidth and yPos - Card.cardHeight // 2 <= \
+               yCoord <= yPos + Card.cardHeight):
                 return cardInd
         return -1
 
+    # Removes the clicked card 
     def removeClickedHandCard(self, card):
         for cardInd in range(len(self.playerCards)):
             if(self.playerCards[cardInd] == card):
                 self.playerCards.pop(cardInd)
                 return
-    
 
-    
-            
-        
+# PieceBoard Class
 class PieceBoard(object):
     amtRows = 10
     amtCols = 10
-    board = [["0"] * CardBoard.amtCols for row in range(CardBoard.amtRows)]
+    # Initial state of piece board is a matrix with no pieces
+    board = [["0"] * PieceBoard.amtCols for row in range(PieceBoard.amtRows)]
     
-#    redImg =
-#    greenImg = 
-
+    # Piece Board properties
     def __init__(self):
         self.board = PieceBoard.board
-##        self.blueImg = Image.open("blue.png")
-##        self.blueImg = blueImg.resize((Card.cardWidth, Card.cardHeight))
-##        self.blueImg = blueImg.putalpha(125)
-##        self.bluePic = ImageTk.PhotoImage(self.blueImg)
 
+    # String representation of the piece board
     def __repr__(self):
         return str(self.board)
 
+    # Converts a click in Tkinter to respective row and column positions
     def convertCoordToPos(self, xCoord, yCoord):
         topLeftX = CardBoard.seperationX - Card.cardWidth // 2
         topLeftY = CardBoard.seperationY - Card.cardHeight // 2
@@ -359,25 +308,34 @@ class PieceBoard(object):
         y = yCoord - topLeftY
         return (y // Card.cardHeight, x // Card.cardWidth)
 
+    # Checks if click is within piece board boundaries
     def onPieceBoard(self, row, col):
         return (0 <= row < PieceBoard.amtRows and \
                 0 <= col < PieceBoard.amtCols)
-    
+
+    # Fills the clicked position with the player number that clicked it
     def fillPosInPieceBoard(self, row, col, playerNum):
         self.board[row][col] = playerNum
 
+    # Checks if the clicked postion is empty
     def isValidPos(self, row, col):
         return self.board[row][col] == "0"
 
+    # Prints the piece board
     def printBoard(self):
         print(self.board)
 
+    # Recursively checks if a connection of 5 pieces exists, meaning a
+    # player has won the game
     def winningBoard(self, row, col):
         if(row >= len(self.board)):
             return False
         elif(self.board[row][col] == "0"):
             newRow, newCol = self.findNextRC(row, col)
             return self.winningBoard(newRow, newCol)
+        # Only need to check these directions since their counterparts are
+        # already accounted for by the way the check moves from position
+        # to postion
         elif(self.diag1Consecutive(row, col) or\
              self.diag2Consecutive(row, col) or \
              self.horizConsecutive(row, col) or\
@@ -387,15 +345,19 @@ class PieceBoard(object):
             newRow, newCol = self.findNextRC(row, col)
             return self.winningBoard(newRow, newCol)
 
+    # Moves to the next position on the piece board
     def findNextRC(self, row, col):
         if(col + 1 == len(self.board[0])):
             return (row+1, 0)
         return (row, col+1)
 
+    # Checks if the row and column values are within piece board limits
     def inBounds(self, row, col):
         return (0 <= row < len(self.board) and \
                 0 <= col < len(self.board[0]))
-        
+
+    # Checks if the top left to bottom right diagonal has 5 consecutive pieces
+    # from the same player
     def diag1Consecutive(self, row, col):
         totalCons = 4
         for i in range(totalCons):
@@ -406,6 +368,8 @@ class PieceBoard(object):
                 return False
         return True
 
+    # Checks if the top left to bottom left diagonal has 5 consecutive pieces
+    # from the same player
     def diag2Consecutive(self, row, col):
         totalCons = 4
         for i in range(totalCons):
@@ -415,7 +379,9 @@ class PieceBoard(object):
                self.board[row + i + 1][col - i - 1]):
                 return False
         return True
-
+    
+    # Checks if the rightward horizontal has 5 consecutive pieces from the
+    # same player
     def horizConsecutive(self, row, col):
         totalCons = 4
         for i in range(totalCons):
@@ -426,6 +392,8 @@ class PieceBoard(object):
                 return False
         return True
 
+    # Checks if the downward vertical has 5 consecutive pieces from the
+    # same player
     def vertConsecutive(self, row, col):
         totalCons = 4
         for i in range(totalCons):
@@ -436,12 +404,15 @@ class PieceBoard(object):
                 return False
         return True
 
+    # Returns the player piece or indicates no piece at a passed postion 
     def getPlayer(self, row, col):
         return self.board[row][col]
 
+    # Sets the player to given player at a passed position
     def setPlayer(self, row, col, player):
         self.board[row][col] = player
 
+    # Checks if the passed postion is a corner position
     def isCornerPiece(self, row, col):
         if((row == 0 and col == 0) or \
            (row == 0 and col == PieceBoard.amtCols- 1) or \
@@ -450,13 +421,13 @@ class PieceBoard(object):
             return True
         return False
     
-    ## TEMP STATE ##
+    # Draws the pieces on the board 
     def drawPieces(self, canvas):
         for row in range(PieceBoard.amtRows):
             for col in range(PieceBoard.amtCols):
                 if(self.board[row][col] != "0"):
+                    # Rectangle represents Piece and color represents player
                     fillP = "purple"
-                    ## Rectangle represents Piece ##
                     if(self.board[row][col] == "1"):
                         fillP = "red"
                     elif(self.board[row][col] == "2"):
@@ -472,11 +443,9 @@ class PieceBoard(object):
                                        CardBoard.seperationY + \
                                        Card.cardHeight * row + Card.cardHeight // 2,\
                                        fill = fillP)
-                    ## END ##
-                        
-                    #canvas.create_image(50, 50, image = self.bluePic)
-    ## END ##
 
+    # Takes a string representation of a temporary piece board and reformats
+    # it into a matrix and populates the real piece board 
     def refillPBoard(self, newBoard):
         nB= newBoard[0]
         nB = nB.replace(', ', ',')
@@ -493,10 +462,10 @@ class PieceBoard(object):
                 self.board[row][col]= nB[counter]
                 counter += 1
 
-
-
+# Button Class
 class Btn(object):
 
+    # Btn properties 
     def __init__(self, color, message, xPos, yPos, \
                  width = Card.cardWidth * 2, height = Card.cardHeight * 2):
         self.color = color
@@ -506,7 +475,7 @@ class Btn(object):
         self.xPos = xPos
         self.yPos = yPos
 
-
+    # Draws button 
     def drawBtn(self, canvas):
         canvas.create_rectangle(self.xPos - self.width // 2, \
                                 self.yPos - self.height // 2, \
@@ -516,6 +485,7 @@ class Btn(object):
         canvas.create_text(self.xPos, self.yPos, text = self.message, \
                            font = "Arial 32 bold", fill = "white")
 
+    # Checks if a button was clicked 
     def buttonClicked(self, xClicked, yClicked):
         leftBound = self.xPos - self.width // 2
         rightBound = self.xPos + self.width // 2
@@ -526,20 +496,25 @@ class Btn(object):
             return True
         return False
 
+# New Card Button (sublass of Button)
 class NewCardBtn(Btn):
 
+    # New Card Btn properties 
     def __init__(self, xPos, yPos):
         self.xPos = xPos
         self.yPos = yPos
         self.width = Card.cardWidth * 2
         self.height = Card.cardHeight * 2
-        # Code struecute for images learned from Image module on PIL documentation
+        # Code structure for images learned from Image module on PIL
+        # documentation
         # https://pillow.readthedocs.io/en/3.1.x/reference/Image.html
         self.imageFile = "playing-card-gifs/x1.gif"
         self.img = Image.open(self.imageFile)
         self.img = self.img.resize((self.width, self.height))
         self.picture = ImageTk.PhotoImage(self.img)
 
+    # When this button is clicked it gives the player a random card from
+    # one of the decks
     def buttonAction(self, playerCards, d1, d2):
         tempHand = playerCards.getCards()
         randDeck = random.randint(0, 1)
@@ -549,11 +524,12 @@ class NewCardBtn(Btn):
             card = d2.getRandomCard()
         tempHand.append(card)
         return tempHand
-        
+
+    # Overrides Button draw 
     def drawBtn(self, canvas):
         canvas.create_image(self.xPos, self.yPos, image = self.picture)
 
-
+# Lines of code: 530
 
 
 

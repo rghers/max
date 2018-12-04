@@ -7,27 +7,33 @@ from sequence import *
 import json
 import sys
 from port_changer import *
-#from run_sequence import *
 
 
 HOST = "" # Empty is own computer # put your IP address here if playing on multiple computers
+
+# Reads current port from file
 portFile = open("port_number.txt")
 lines = portFile.readlines()
 initialPort = int(lines[0])
 portFile.close()
 
+# Creates new port and populates PORT with value
 p = Port(initialPort)
 p.getNewPortNum()
 p.copyToFile("port_number.txt")
 PORT = p.getPortNum() # Change each time you test
-print(PORT)
-BACKLOG = 3 # number of people
 
+# Number of people to connect with server
+BACKLOG = 3 
+
+# Creates socket connection to client
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 server.bind((HOST,PORT))
 server.listen(BACKLOG)
 print("looking for connection")
 
+# Takes a string representation of a temporary piece board and reformats
+# it into a matrix and populates the real piece board 
 def fillPBoard(msg):
     msg = msg.split(" [[")
     matrixMsg = msg[1]      
@@ -59,6 +65,7 @@ def fillPBoard(msg):
                     pBoard.setPlayer(row, col, '0')
             counter += 1
 
+# Gets the nex player
 def getNextPlayer(currPlayer):
     if(currPlayer == "1"):
         return "2"
@@ -67,11 +74,14 @@ def getNextPlayer(currPlayer):
     else:
         return "1"
 
+# Handles client 
 def handleClient(client, serverChannel, cID, clientele):
     client.setblocking(1)
     msg = ""
     while True:
         try:
+            # Number in recv refers to amount of characters the server
+            # accepts from a client message
             msg = client.recv(1024).decode("UTF-8")
             command = msg.split("\n")
             while (len(command) > 1):
@@ -81,21 +91,28 @@ def handleClient(client, serverChannel, cID, clientele):
                 command = msg.split("\n")
             tempMsg = command
             tempMsg = command[0].split(" ")
+            # If a client won the game it alerts all clients the game
+            # is over
             if(tempMsg[0] == "gameOver"):
                 msg = "gameOver " + (msg.split(" ")[1]) + "\n"
                 for cID in clientele:
                     clientele[cID].send(msg.encode())
+            # After a player turn it sends updated board to all clients 
             elif(tempMsg[0] == "playerPlayed"):
                 fillPBoard(msg)
                 msg = "boardFilled " + str(pBoard) + "\n"
                 msg = msg.replace(", ",",")
                 for cID in clientele:
                     clientele[cID].send(msg.encode())
+            # After a player ends their turn, this finds the next player
+            # and updates all the clients of who's turn it is
             elif(tempMsg[0] == "playerEnded"):
                 nextPlayer = getNextPlayer(msg.split(" ")[1])
                 msg = "nextPlayer " + nextPlayer + "\n"
                 for cID in clientele:
                     clientele[cID].send(msg.encode())
+            # After a player readies up for the game it let's all clients
+            # know so they can identify whether or not to start the game. 
             elif(tempMsg[0] == "playerReady"):
                 msg = "playerReady " + msg.split(" ")[1] + "\n"
                 for cID in clientele:
@@ -105,6 +122,7 @@ def handleClient(client, serverChannel, cID, clientele):
             print("client handle of server failed")
             return
 
+# Server message print out of when it sends a message to the clients
 def serverThread(clientele, serverChannel):
     while True:
         msg = serverChannel.get(True, None)
@@ -123,17 +141,20 @@ def serverThread(clientele, serverChannel):
         print()
         serverChannel.task_done()
 
+# Dictionary of all players
 clientele = dict()
+# Index for players list
 playerNum = 0
-
+# List with players IDs
+players = [1, 2, 3]
+# Creates server piece board
 pBoard = PieceBoard()
-gameOver = False
 
+# Creates server queue and thread
 serverChannel = Queue(100)
 threading.Thread(target = serverThread, args = (clientele, serverChannel)).start()
 
-players = [1, 2, 3]
-
+# Keeps the connection of the server to client up and running
 while True:
     client, address = server.accept()
     # myID is the key to the client in the clientele dictionary
@@ -149,12 +170,4 @@ while True:
                         (client ,serverChannel, myID, clientele)).start()
     playerNum += 1
 
-##
-##def main():
-##    print("In server")
-##    for arg in sys.argv[1:]:
-##        print("python server argument " + str(arg))
-##
-##if __name__ == "__main__":
-##    main()
-
+# Lines of code: 171
