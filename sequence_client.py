@@ -1,7 +1,4 @@
-
-# ADD REPLAYABILITY
 # ADD SOUNDS MAYBE
-# ADD RULES PAGE
 # ADD AI
 
 
@@ -410,4 +407,4 @@ threading.Thread(target = handleServerMsg, args = (server, serverMsg)).start()
 # Runs client 
 run(1400, 810, serverMsg, server)
 
-# Lines of code: 377
+# Lines of code: 411
