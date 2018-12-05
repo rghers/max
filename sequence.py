@@ -290,7 +290,7 @@ class PieceBoard(object):
     amtRows = 10
     amtCols = 10
     # Initial state of piece board is a matrix with no pieces
-    board = [["0"] * PieceBoard.amtCols for row in range(PieceBoard.amtRows)]
+    board = [["0"] * CardBoard.amtCols for row in range(CardBoard.amtRows)]
     
     # Piece Board properties
     def __init__(self):

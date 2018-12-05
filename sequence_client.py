@@ -71,6 +71,7 @@ def init(data):
     data.playedTurn = False
     data.receivedCard = False
     data.startGameScreen = True
+    data.rulesScreen = False
     # Data for creation of piece board
     data.pBoard = PieceBoard()
     # Data for holding client player numbers
@@ -90,6 +91,8 @@ def init(data):
                               data.margin * 2, data.margin * 2)
     data.rulesBtn = Btn("blue", "Rules", data.width // 2, \
                             data.margin * 3)
+    data.exitRulesBtn = Btn("blue", "Exit", data.width - data.margin, \
+                            data.height - data.margin)
     # Data for connectivity of players to the server
     data.readyPlayers = [False, False, False]
 
@@ -141,10 +144,17 @@ def playerRemovedPiece(data, row, col):
 # Mouse pressed event
 def mousePressed(event, data):
     msg = ""
+    # Splash screen boolean statement for rules screen
+    if(data.rulesScreen):
+        if(data.exitRulesBtn.buttonClicked(event.x, event.y)):
+                data.rulesScreen = False
     # Splash screen boolean statement for home screen
-    if(data.startGameScreen):
+    elif(data.startGameScreen):
+        # Displays rules if client clicks page
+        if(data.rulesBtn.buttonClicked(event.x, event.y)):
+            data.rulesScreen = True
         # If client clicks single player we call the sequence_AI file
-        if(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
+        elif(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
             import sequence_AI
         # If player clicks mulitplayer we connect them to the server
         elif(data.multiPlayerBtn.buttonClicked(event.x, event.y)):
@@ -291,10 +301,34 @@ def drawStartScreen(canvas, data):
     data.multiPlayerBtn.drawBtn(canvas)
     data.rulesBtn.drawBtn(canvas)
 
+# Draws rules screen
+def drawRulesScreen(canvas, data):
+    canvas.create_rectangle(0, 0, data.width, data.height, outline = "blue", \
+                           width = 20)
+    rules = "Objective\n\tOne player or team must score ONE SEQUENCE (5 consecutive " +\
+    "pieces) before their opponents.\nThe Jacks\n\tTo play a two-eyed Jack, place " +\
+    "one of your marker chips on any open space on the game board.\n\tTo play a one-" +\
+    "eyed Jack, remove one of your opponents marker chips from the game board.\n Loss " +\
+    "of card\n\tOnce you have placed your marker chip on the game board, you must take " +\
+    "a card from the draw deck by clicking draw deck. If you fail to take a card before " +\
+    "\n\tthe next player makes a move AND takes his/her card, you lose the right to take a card " +\
+    "and you must finish the game with less cards than other players. \nDead Card\n\t" +\
+    "If you hold a card in your hand which does not have an open space on the game board " +\
+    "because both spaces representing that card are covered by a marker \n\tchip, you may turn " +\
+    "it in for a new card by simply clicking the card in your hand.\nPlaying Piece\n\tIn order to "+\
+    "play a piece, simply click the card on the game board and a piece will automatically be "+\
+    "placed."
+    coord = 50
+    canvas.create_text(coord, coord, anchor = NW, text = rules, font = "Times 20")
+    data.exitRulesBtn.drawBtn(canvas)
+    
 # Redraw all event
 def redrawAll(canvas, data):
+    # Draws rules game splash screen
+    if(data.rulesScreen):
+        drawRulesScreen(canvas, data)
     # Draws start game splash screen
-    if(data.startGameScreen):
+    elif(data.startGameScreen):
         drawStartScreen(canvas, data)
         if(data.readyPlayers[int(data.playerID) - 1]):
             canvas.create_text(data.width - data.margin * 1.5, \
