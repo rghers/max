@@ -1,10 +1,3 @@
-# ADD SOUNDS MAYBE
-# ADD AI
-
-
-
-
-
 # Barebone client code acquired from
 # https://kdchin.gitbooks.io/sockets-module-manual/
 
@@ -188,7 +181,6 @@ def mousePressed(event, data):
         elif(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
             # IDEA IS TO CREATE NEW THREAD HERE AND THEN RUN
             print("imported AI")
-            
             runTempGame()
         # If player clicks mulitplayer we connect them to the server
         elif(data.multiPlayerBtn.buttonClicked(event.x, event.y)):
@@ -281,7 +273,9 @@ def timerFired(data):
             # Waits for all players to connect
             elif(command == "playerReady"):
                 data.readyPlayers[int(msg[1]) - 1] = True
+                print(data.readyPlayers)
                 if(False not in data.readyPlayers):
+                    data.pBoard.resetBoard()
                     data.startGameScreen = False
         except:
             print("failed")
@@ -446,4 +440,4 @@ threading.Thread(target = handleServerMsg, args = (server, serverMsg)).start()
 # Runs client 
 run(1400, 810, serverMsg, server)
 
-# Lines of code: 411
+# Lines of code: 441

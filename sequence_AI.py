@@ -500,7 +500,7 @@ def runTempGame(width=1400, height=810):
     data.height = height
     data.timerDelay = 100 # milliseconds
     # create the root and the canvas
-    root = Tk()
+    root = Toplevel()
     canvas = Canvas(root, width=data.width, height=data.height)
     canvas.pack()
     init(data)
@@ -514,6 +514,4 @@ def runTempGame(width=1400, height=810):
     root.mainloop()  # blocks until window is closed
     print("bye!")
 
-#runTempGame()
-
-# Lines of code: 456
+# Lines of code: 515

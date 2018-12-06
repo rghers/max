@@ -345,6 +345,10 @@ class PieceBoard(object):
             newRow, newCol = self.findNextRC(row, col)
             return self.winningBoard(newRow, newCol)
 
+    # Resets the piece board
+    def resetBoard(self):
+        self.board = [["0"] * CardBoard.amtCols for row in range(CardBoard.amtRows)]
+
     # Moves to the next position on the piece board
     def findNextRC(self, row, col):
         if(col + 1 == len(self.board[0])):
@@ -529,7 +533,7 @@ class NewCardBtn(Btn):
     def drawBtn(self, canvas):
         canvas.create_image(self.xPos, self.yPos, image = self.picture)
 
-# Lines of code: 530
+# Lines of code: 534
 
 
 
