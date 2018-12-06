@@ -514,6 +514,6 @@ def runTempGame(width=1400, height=810):
     root.mainloop()  # blocks until window is closed
     print("bye!")
 
-runTempGame()
+#runTempGame()
 
 # Lines of code: 456

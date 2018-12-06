@@ -15,7 +15,8 @@ import json
 from tkinter import *
 from sequence import *
 import random
-#from sequence_AI import * 
+#import sequence_AI
+from sequence_AI import * 
 
 HOST = "" # put your IP address here if playing on multiple computers
 
@@ -48,7 +49,39 @@ def handleServerMsg(server, serverMsg):
             msg = "\n".join(command[1:])
             serverMsg.put(readyMsg)
             command = msg.split("\n")
-    
+
+            
+# Play code acquired from:
+# https://abhgog.gitbooks.io/pyaudio-manual/sample-project.html    
+# PyAudio Example: Play a WAVE file
+import pyaudio
+import wave
+from array import array
+from struct import pack
+
+
+def play(file):
+    CHUNK = 1024
+
+    wf = wave.open(file, 'rb')
+
+    p = pyaudio.PyAudio()
+
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True)
+
+    data = wf.readframes(CHUNK)
+
+    while len(data) > 0:
+        stream.write(data)
+        data = wf.readframes(CHUNK)
+
+    stream.stop_stream()
+    stream.close()
+
+    p.terminate()
 
 # Code acquired from CMU 15-112: Fundamentals of Programming and Computer
 # Science Class Notes: Animation Part 2: Time-Based Animations in Tkinter
@@ -154,7 +187,9 @@ def mousePressed(event, data):
         # If client clicks single player we call the sequence_AI file
         elif(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
             # IDEA IS TO CREATE NEW THREAD HERE AND THEN RUN
-            import sequence_AI
+            print("imported AI")
+            
+            runTempGame()
         # If player clicks mulitplayer we connect them to the server
         elif(data.multiPlayerBtn.buttonClicked(event.x, event.y)):
             msg = "playerReady " + data.playerID
@@ -195,6 +230,7 @@ def mousePressed(event, data):
                      data.playerCards.hasOneEyedJack() and\
                      data.playerID != data.pBoard.getPlayer(row, col)):
                     playerRemovedPiece(data, row, col)
+                    play("removeCard.wav")
                     msg = "playerPlayed " + str(data.pBoard)
                     print(msg)
             # Checks if a player wants to get a new card after playing a turn
@@ -204,6 +240,7 @@ def mousePressed(event, data):
                 data.receivedCard = True
             # Checks if a player wants to end their turn
             elif(data.endTurnBtn.buttonClicked(event.x, event.y)):
+                play("endturn.wav")
                 data.playedTurn = False
                 data.receivedCard = False
                 msg = "playerEnded " +  data.playerID 
