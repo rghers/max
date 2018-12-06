@@ -48,6 +48,7 @@ def handleServerMsg(server, serverMsg):
             msg = "\n".join(command[1:])
             serverMsg.put(readyMsg)
             command = msg.split("\n")
+    
 
 # Code acquired from CMU 15-112: Fundamentals of Programming and Computer
 # Science Class Notes: Animation Part 2: Time-Based Animations in Tkinter
@@ -152,6 +153,7 @@ def mousePressed(event, data):
             data.rulesScreen = True
         # If client clicks single player we call the sequence_AI file
         elif(data.singlePlayerBtn.buttonClicked(event.x, event.y)):
+            # IDEA IS TO CREATE NEW THREAD HERE AND THEN RUN
             import sequence_AI
         # If player clicks mulitplayer we connect them to the server
         elif(data.multiPlayerBtn.buttonClicked(event.x, event.y)):
@@ -400,7 +402,7 @@ def run(width, height, serverMsg=None, server=None):
     root.mainloop()  # blocks until window is closed
     print("bye!")
         
-# Creates queue and thread    
+# Creates queue and runs thread    
 serverMsg = Queue(100)
 threading.Thread(target = handleServerMsg, args = (server, serverMsg)).start()
 

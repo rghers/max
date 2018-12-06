@@ -167,7 +167,7 @@ while True:
     client.send(("myIDis %s \n" % myID).encode())
     print("connection recieved from %s" % myID)
     threading.Thread(target = handleClient, args = 
-                        (client ,serverChannel, myID, clientele)).start()
+                        (client, serverChannel, myID, clientele)).start()
     playerNum += 1
 
 # Lines of code: 171

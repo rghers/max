@@ -502,7 +502,6 @@ def runTempGame(width=1400, height=810):
     # create the root and the canvas
     root = Tk()
     canvas = Canvas(root, width=data.width, height=data.height)
-    canvas.configure(bd=0, highlightthickness=0)
     canvas.pack()
     init(data)
     # set up events
